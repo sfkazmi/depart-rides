@@ -37,7 +37,7 @@ const CARS = [
     type: 'SUV',
     year: 'Model year on request',
     seats: '5 seats',
-    rate: 'On request',
+    rate: 'Price on demand',
     image: 'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=1200&q=85',
     desc: 'Bold, adventure-inspired design with the versatility to make every journey memorable.'
   },
@@ -49,7 +49,7 @@ const CARS = [
     year: '2014',
     seats: '5 seats',
     specs: ['1.3L petrol', 'Manual'],
-    rate: 'On request',
+    rate: 'Price on demand',
     image: 'assets/corolla-xli-front.jpg',
     desc: 'A dependable, economical black 2014 Corolla XLi sedan with a 1.3L petrol engine and manual gearbox — ideal for city travel, airport transfers and everyday plans.'
   },
@@ -177,7 +177,7 @@ function home() {
             <div class="counter"><strong><span data-count="24">00</span><em>/7</em></strong><span>Inquiry hours</span></div>
             <div class="counter"><strong><span data-count="2018">0000</span></strong><span>Flagship V8 year</span></div>
           </div>
-          <p class="price-note">Daily rates in PKR for local Jhelum and outside-city trips. Final pricing and availability are confirmed on inquiry; other vehicles are <strong>On request</strong>.</p>
+          <p class="price-note">Daily rates in PKR for local Jhelum and outside-city trips. Final pricing and availability are confirmed on inquiry; Jetour T2 and Corolla XLi are <strong>Price on demand</strong>.</p>
           <div class="price-grid">${priceCards()}</div>
         </div>
       </div>
@@ -204,7 +204,7 @@ ${cta()}
 }
 
 function fleet() {
-  return `<main>${heading('OUR FLEET', 'Choose your <span class="accent italic">ride.</span>', 'A curated collection for city drives, family adventures, executive travel and everything in between.')}<section class="section"><div class="wrap"><div class="filters" aria-label="Filter vehicles"><button class="chip selected" data-filter="All">All vehicles</button><button class="chip" data-filter="SUV">SUVs</button><button class="chip" data-filter="Luxury">Luxury</button><button class="chip" data-filter="Sedan">Sedans</button></div><div class="grid grid-3" id="fleet-grid">${cards()}</div><p class="fineprint">Note: Images of the Haval H6 and Jetour T2 are illustrative placeholders until actual photos are provided; Corolla XLi photos are coming soon. Rates shown are per day in PKR and are confirmed on inquiry; vehicles without listed rates are On request.</p></div></section>${cta()}</main>`;
+  return `<main>${heading('OUR FLEET', 'Choose your <span class="accent italic">ride.</span>', 'A curated collection for city drives, family adventures, executive travel and everything in between.')}<section class="section"><div class="wrap"><div class="filters" aria-label="Filter vehicles"><button class="chip selected" data-filter="All">All vehicles</button><button class="chip" data-filter="SUV">SUVs</button><button class="chip" data-filter="Luxury">Luxury</button><button class="chip" data-filter="Sedan">Sedans</button></div><div class="grid grid-3" id="fleet-grid">${cards()}</div><p class="fineprint">Note: Images of the Haval H6 and Jetour T2 are illustrative placeholders until actual photos are provided; Corolla XLi photos are coming soon. Rates shown are per day in PKR and are confirmed on inquiry; Jetour T2 and Corolla XLi are Price on demand.</p></div></section>${cta()}</main>`;
 }
 
 function vehicle() {
@@ -225,7 +225,7 @@ function about() {
 function faq() {
   const data = [
     ['How do I book a car?', 'Browse the fleet, choose a vehicle and submit a booking inquiry with your dates and pickup location. A booking is only confirmed after direct communication with Depart Rides.'],
-    ['Are prices listed online?', 'Daily rate ranges in PKR are listed for the Toyota Prado, Haval H6 and Land Cruiser V8, for local Jhelum and outside-city trips. Other vehicles are On request. Final rates depend on dates, trip duration and requirements and are confirmed on inquiry.'],
+    ['Are prices listed online?', 'Daily rate ranges in PKR are listed for the Toyota Prado, Haval H6 and Land Cruiser V8, for local Jhelum and outside-city trips. The Jetour T2 and Corolla XLi are Price on demand. Final rates depend on dates, trip duration and requirements and are confirmed on inquiry.'],
     ['Can I request a driver?', 'Yes, you can mention your driver requirements in the booking inquiry. Availability and any additional charges must be confirmed directly.'],
     ['What documents do I need?', 'Required identification, license and security arrangements depend on the rental type and will be confirmed before booking.'],
     ['Can I change or cancel a booking?', 'Please contact Depart Rides directly. Cancellation and modification conditions will be explained when your booking is confirmed.'],

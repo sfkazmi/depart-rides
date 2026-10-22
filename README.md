@@ -29,7 +29,6 @@ Cabin and engine photography of the actual fleet does not exist in `assets/`. Th
 | `assets/stock-leather.jpg` | [Unsplash](https://unsplash.com/photos/gXaWrl4eQ0c) | Christopher Lam (`@cwdlphotos`) — Porsche cabin |
 | `assets/stock-wheel.jpg` | [Unsplash](https://unsplash.com/photos/FZcQRwFSR1Y) | Leiada Krözjhen (`@leiadakrozjhen`) — tan luxury cabin |
 | `assets/stock-engine.jpg` | [Unsplash](https://unsplash.com/photos/D4YRzVtynV8) | engine bay still (`photo-1486262715619-67b85e0b08d3`) |
-| `assets/stock-engine-alt.jpg` | [Pexels](https://www.pexels.com/photo/190574/) | chrome engine close-up |
 
 Unsplash License / Pexels License: free to use, with photographer credit.
 
