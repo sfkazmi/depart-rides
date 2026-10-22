@@ -273,7 +273,7 @@ p { color: var(--muted); }
 .banner p { color: #344225; margin: 12px 0 0; }
 
 .footer { padding: 70px 0 25px; border-top: 1px solid var(--line); }
-.footer-main { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 60px; }
+.footer-main { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 60px; }
 .footer a:not(.brand) { color: #aab5aa; font-size: 14px; display: block; margin: 9px 0; }
 .footer a:hover { color: var(--lime); }
 .footer h4 { font-size: 11px; letter-spacing: 2.4px; }
@@ -857,3 +857,18 @@ html.cinema-static .lux-panels, html.cinema-static .price-grid { pointer-events:
 .rates--lg .rate-range { font-size: 22px; }
 .vehicle-bottom > div:first-child { flex: 1; }
 .price-card__rate { display: flex; flex-direction: column; gap: 3px; text-transform: none; letter-spacing: .04em; }
+
+/* Contact actions */
+.nav-phone{color:inherit;font-size:13px;letter-spacing:.06em;text-decoration:none;margin-right:14px;white-space:nowrap;opacity:.85}
+.nav-phone:hover{color:var(--accent,#d7ff3f);opacity:1}
+@media (max-width:1100px){.nav-phone{display:none}}
+.banner-actions,.contact-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.contact-actions{margin-top:14px}
+.contact-actions .btn{flex:1 1 180px;justify-content:center}
+.btn svg{vertical-align:-3px;margin-right:6px;flex:none}
+.btn.wa{background:#25d366;color:#05210f;border-color:#25d366}
+.footer-loc{display:block;color:var(--muted);margin-top:10px;font-size:14px}
+.wa-float{position:fixed;right:16px;bottom:16px;z-index:60;width:54px;height:54px;border-radius:50%;background:#25d366;color:#fff;display:none;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.wa-float svg{width:28px;height:28px}
+@media (max-width:760px){.wa-float{display:flex}.banner-actions{width:100%}.banner-actions .btn{flex:1 1 100%;justify-content:center}}
+.contact-actions .btn,.banner-actions .btn{white-space:nowrap}

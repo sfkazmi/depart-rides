@@ -33,7 +33,7 @@ Cabin and engine photography of the actual fleet does not exist in `assets/`. Th
 Unsplash License / Pexels License: free to use, with photographer credit.
 
 ## Forms
-Booking and contact forms are functional client-side validation and create an email draft in the visitor's default email app. They DO NOT transmit data, create confirmed bookings, check live availability or take payments. A production deployment needs business contact details, backend or form service, privacy and legal review, real rental pricing and terms.
+Booking and contact forms are functional client-side validation and create an email draft in the visitor's default email app. They DO NOT transmit data, create confirmed bookings, check live availability or take payments. Business phone/WhatsApp: 0339 9999038 (+92 339 9999038), shown in the header, footer, contact page, home banner, vehicle pages (WhatsApp prefilled with the car name) and as a floating WhatsApp button on mobile; schema.org AutoRental JSON-LD is in every page head. A production deployment could add a business email, backend or form service, privacy and legal review, real rental pricing and terms.
 
 ## Animation
 The home page is a pinned, scroll-driven cinematic sequence (GSAP + ScrollTrigger via jsDelivr CDN): the Land Cruiser drives into frame, the camera zooms into an interior, then pulls back to the front/engine with animated counters and on-request pricing, then fleet, motion reel, booking CTA and footer. Other pages share the dark luxury palette, serif display type, and reveal-on-scroll. `prefers-reduced-motion` disables pin/tween and shows stacked static scenes. No build step.
