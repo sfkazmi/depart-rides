@@ -96,7 +96,7 @@ function nav() {
 }
 
 function footer() {
-  return `<footer class="footer"><div class="wrap"><div class="footer-main"><div><a href="index.html" class="brand">DEPART<span> / </span>RIDES<small>DRIVE THE EXTRAORDINARY</small></a><p style="max-width:350px;margin-top:25px">Discover the freedom of the open road with a curated fleet of vehicles for every occasion.</p></div><div><h4>EXPLORE</h4><a href="fleet.html">Our Fleet</a><a href="booking.html">Book a Ride</a><a href="about.html">About Us</a><a href="faq.html">FAQs</a></div><div><h4>INFORMATION</h4><a href="contact.html">Contact</a><a href="terms.html">Rental Terms</a><a href="privacy.html">Privacy</a><a href="contact.html">Request a Quote</a></div></div><div class="footer-bottom"><span>© <span id="year"></span> Depart Rides. All rights reserved.</span><span>CRAFTED FOR THE JOURNEY.</span></div></div></footer>`;
+  return `<footer class="footer"><div class="wrap"><div class="footer-main"><div><a href="index.html" class="brand">DEPART<span> / </span>RIDES<small>DRIVE THE EXTRAORDINARY</small></a><p style="max-width:350px;margin-top:25px">Car rentals in Jhelum: Toyota Land Cruiser V8, Toyota Prado, Haval H6, Jetour T2 and Toyota Corolla XLi.</p></div><div><h4>EXPLORE</h4><a href="fleet.html">Our Fleet</a><a href="booking.html">Book a Ride</a><a href="about.html">About Us</a><a href="faq.html">FAQs</a></div><div><h4>INFORMATION</h4><a href="contact.html">Contact</a><a href="terms.html">Rental Terms</a><a href="privacy.html">Privacy</a><a href="contact.html">Request a Quote</a></div></div><div class="footer-bottom"><span>© <span id="year"></span> Depart Rides. All rights reserved.</span><span>CRAFTED FOR THE JOURNEY.</span></div></div></footer>`;
 }
 
 function heading(k, title, sub) {
@@ -112,7 +112,7 @@ function cards(list = CARS) {
 }
 
 function cta() {
-  return `<section class="section tight"><div class="wrap"><div class="banner reveal"><div><h2>Your next drive<br>starts here.</h2><p>Tell us your dates. We'll help you find your perfect ride.</p></div><a class="btn dark" href="booking.html">Request your ride ↗</a></div></div></section>`;
+  return `<section class="section tight"><div class="wrap"><div class="banner reveal"><div><h2>Your next drive<br>starts here.</h2><p>Tell us your dates, car and whether you are driving locally in Jhelum or out of city.</p></div><a class="btn dark" href="booking.html">Request your ride ↗</a></div></div></section>`;
 }
 
 function priceCards() {
@@ -142,9 +142,9 @@ function home() {
       </div>
       <div class="scene scene-hero" data-scene="hero">
         <div class="wrap">
-          <span class="eyebrow">Premium car rentals · Pakistan</span>
+          <span class="eyebrow">Car rentals · Jhelum, Pakistan</span>
           <h1><span class="line"><span>The road</span></span><span class="line"><span class="accent italic">is yours.</span></span></h1>
-          <p class="intro">A cinematic fleet for the journeys that deserve more — led by the Land Cruiser V8.</p>
+          <p class="intro">Five cars for Jhelum and beyond: Toyota Land Cruiser V8, Toyota Prado, Haval H6, Jetour T2 and Toyota Corolla XLi. Clear daily rates for local and outside-city trips.</p>
           <div class="hero-actions"><a class="btn" href="fleet.html">Explore the fleet ↗</a><a class="btn outline" href="booking.html">Book a ride</a></div>
         </div>
         <div class="scroll-hint">Scroll to enter the cabin <i></i></div>
@@ -154,42 +154,42 @@ function home() {
           <div class="scene-copy">
             <span class="eyebrow">02 · The cabin</span>
             <h2>Quiet. Composed.<br><span class="accent italic">Considered.</span></h2>
-            <p>The camera moves inside — leather, hush, and the kind of comfort that turns a transfer into an occasion. Interior stills are licensed stock, used until cabin photography of the actual fleet is available.</p>
+            <p>From city errands in Jhelum to family trips out of town, choose the cabin that fits the day. Interior stills are illustrative stock images until photos of our own cars are available.</p>
           </div>
           <div class="lux-panels">
-            <article class="lux-panel" data-panel="seats"><img src="assets/stock-seats.jpg" alt=""><div><span>01 / Seats</span><h3>Held in leather</h3><p>Quilted calm for city streets and mountain hours.</p></div></article>
-            <article class="lux-panel" data-panel="cabin"><img src="assets/stock-cabin.jpg" alt=""><div><span>02 / Cabin</span><h3>A private lounge</h3><p>Wood, glass, and a hush that travels with you.</p></div></article>
-            <article class="lux-panel" data-panel="ride"><img src="assets/stock-interior.jpg" alt=""><div><span>03 / Ride</span><h3>Composed motion</h3><p>A settled, executive gait for long Pakistan roads.</p></div></article>
-            <article class="lux-panel" data-panel="amenities"><img src="assets/stock-wheel.jpg" alt=""><div><span>04 / Amenities</span><h3>Every detail</h3><p>Climate, craft, and the small luxuries of a longer day.</p></div></article>
+            <article class="lux-panel" data-panel="seats"><img src="assets/stock-seats.jpg" alt=""><div><span>01 / Family</span><h3>Room for seven</h3><p>The Toyota Prado seats seven for family journeys and group travel.</p></div></article>
+            <article class="lux-panel" data-panel="cabin"><img src="assets/stock-cabin.jpg" alt=""><div><span>02 / Flagship</span><h3>Land Cruiser V8</h3><p>Our 2018 flagship for executive travel and special occasions.</p></div></article>
+            <article class="lux-panel" data-panel="ride"><img src="assets/stock-interior.jpg" alt=""><div><span>03 / SUVs</span><h3>Haval H6 &amp; Jetour T2</h3><p>Modern five-seat SUVs for comfortable everyday and out-of-city trips.</p></div></article>
+            <article class="lux-panel" data-panel="amenities"><img src="assets/stock-wheel.jpg" alt=""><div><span>04 / Sedan</span><h3>Corolla XLi</h3><p>A 2014 black Corolla XLi, 1.3L manual: simple, economical city driving.</p></div></article>
           </div>
         </div>
       </div>
       <div class="scene scene-perf" data-scene="perf">
         <div class="wrap scene-perf-inner">
           <div class="scene-copy">
-            <span class="eyebrow">03 · The machine</span>
-            <h2>Presence that <span class="accent italic">announces itself.</span></h2>
-            <p>Pull back to the grille — the 2018 Land Cruiser V8, photographed on our own fleet. Counters use facts already listed on this site.</p>
+            <span class="eyebrow">03 · Rates</span>
+            <h2>Clear rates, <span class="accent italic">per day.</span></h2>
+            <p>Our 2018 Land Cruiser V8, photographed on our own fleet. Local Jhelum rates include fuel for the V8 and Prado; outside-city rates are without fuel.</p>
           </div>
           <div class="counters">
-            <div class="counter"><strong><span data-count="5">00</span><em>+</em></strong><span>Vehicles in fleet</span></div>
-            <div class="counter"><strong><span data-count="7">00</span></strong><span>Prado seats</span></div>
-            <div class="counter"><strong><span data-count="24">00</span><em>/7</em></strong><span>Inquiry hours</span></div>
+            <div class="counter"><strong><span data-count="5">00</span></strong><span>Cars in the fleet</span></div>
+            <div class="counter"><strong><em>Rs </em><span data-count="20">00</span><em>K</em></strong><span>V8 per day from · local, with fuel</span></div>
+            <div class="counter"><strong><em>Rs </em><span data-count="15">00</span><em>K</em></strong><span>Prado per day from · local, with fuel</span></div>
             <div class="counter"><strong><span data-count="2018">0000</span></strong><span>Flagship V8 year</span></div>
           </div>
-          <p class="price-note">Daily rates in PKR for local Jhelum and outside-city trips. Final pricing and availability are confirmed on inquiry; Jetour T2 and Corolla XLi are <strong>Price on demand</strong>.</p>
+          <p class="price-note">Daily rates in PKR for local Jhelum and outside-city trips. Availability is confirmed on inquiry; Jetour T2 and Corolla XLi are <strong>Price on demand</strong>.</p>
           <div class="price-grid">${priceCards()}</div>
         </div>
       </div>
     </div>
   </div>
 </section>
-<div class="marquee"><div class="marquee-inner">DEPART RIDES ✦ DRIVE THE EXTRAORDINARY ✦ YOUR ROAD, YOUR STORY ✦ DEPART RIDES ✦ DRIVE THE EXTRAORDINARY ✦ YOUR ROAD, YOUR STORY ✦ &nbsp;</div></div>
+<div class="marquee"><div class="marquee-inner">DEPART RIDES ✦ CAR RENTALS IN JHELUM ✦ LAND CRUISER V8 ✦ PRADO ✦ HAVAL H6 ✦ JETOUR T2 ✦ COROLLA XLi ✦ DEPART RIDES ✦ CAR RENTALS IN JHELUM ✦ &nbsp;</div></div>
 <section class="section" id="fleet">
   <div class="wrap">
     <div class="section-top">
       <div><span class="eyebrow reveal">04 · The collection</span><h2 class="reveal">Meet your <span class="accent italic">next ride.</span></h2></div>
-      <p class="reveal">Five distinctive vehicles. Countless possibilities. Choose your kind of extraordinary.</p>
+      <p class="reveal">Five cars, from the Land Cruiser V8 to the Corolla XLi. Local Jhelum and outside-city rates on every priced car.</p>
     </div>
     <div class="grid grid-3">${cards()}</div>
     <div style="text-align:center;margin-top:35px"><a class="btn outline" href="fleet.html">View the entire fleet ↗</a></div>
@@ -197,7 +197,7 @@ function home() {
 </section>
 <section class="reel" aria-label="Fleet motion reel">
   <video src="assets/fleet-gwm-video.mp4" autoplay muted loop playsinline></video>
-  <div class="reel-copy"><div class="wrap"><span class="eyebrow">On the road</span><h2>Motion, <span class="accent italic">unhurried.</span></h2><p>Additional GWM vehicle footage from the fleet archive. Model not independently verified.</p></div></div>
+  <div class="reel-copy"><div class="wrap"><span class="eyebrow">On the road</span><h2>Motion, <span class="accent italic">unhurried.</span></h2><p>GWM footage from the fleet archive.</p></div></div>
 </section>
 ${cta()}
 </main>`;
