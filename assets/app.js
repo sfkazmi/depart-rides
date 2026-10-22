@@ -36,13 +36,14 @@ const CARS = [
   {
     id: 'corolla-xli',
     name: 'Toyota Corolla XLi',
-    tag: '2015 · Black',
+    tag: '2014 · Black',
     type: 'Sedan',
-    year: '2015',
+    year: '2014',
     seats: '5 seats',
+    specs: ['1.3L petrol', 'Manual'],
     rate: 'On request',
-    image: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=1200&q=85',
-    desc: 'A dependable, comfortable black sedan for city travel, airport transfers and everyday plans.'
+    image: 'assets/corolla-xli-front.jpg',
+    desc: 'A dependable, economical black 2014 Corolla XLi sedan with a 1.3L petrol engine and manual gearbox — ideal for city travel, airport transfers and everyday plans.'
   },
   {
     id: 'land-cruiser-v8',
@@ -187,13 +188,13 @@ ${cta()}
 }
 
 function fleet() {
-  return `<main>${heading('OUR FLEET', 'Choose your <span class="accent italic">ride.</span>', 'A curated collection for city drives, family adventures, executive travel and everything in between.')}<section class="section"><div class="wrap"><div class="filters" aria-label="Filter vehicles"><button class="chip selected" data-filter="All">All vehicles</button><button class="chip" data-filter="SUV">SUVs</button><button class="chip" data-filter="Luxury">Luxury</button><button class="chip" data-filter="Sedan">Sedans</button></div><div class="grid grid-3" id="fleet-grid">${cards()}</div><p class="fineprint">Note: Images of the Haval H6, Jetour T2 and Corolla are illustrative placeholders until actual photos are provided. Vehicle specifications and rates are confirmed on inquiry. Published rate for every vehicle: On request.</p></div></section>${cta()}</main>`;
+  return `<main>${heading('OUR FLEET', 'Choose your <span class="accent italic">ride.</span>', 'A curated collection for city drives, family adventures, executive travel and everything in between.')}<section class="section"><div class="wrap"><div class="filters" aria-label="Filter vehicles"><button class="chip selected" data-filter="All">All vehicles</button><button class="chip" data-filter="SUV">SUVs</button><button class="chip" data-filter="Luxury">Luxury</button><button class="chip" data-filter="Sedan">Sedans</button></div><div class="grid grid-3" id="fleet-grid">${cards()}</div><p class="fineprint">Note: Images of the Haval H6 and Jetour T2 are illustrative placeholders until actual photos are provided; Corolla XLi photos are coming soon. Vehicle specifications and rates are confirmed on inquiry. Published rate for every vehicle: On request.</p></div></section>${cta()}</main>`;
 }
 
 function vehicle() {
   const v = car(new URLSearchParams(location.search).get('id'));
   const imgs = v.gallery || [v.image];
-  return `<main>${heading('THE COLLECTION', v.name, v.desc)}<section class="section"><div class="wrap detail-layout"><div class="reveal"><div class="detail-photo"><img id="main-car-image" src="${imgs[0]}" alt="${v.name}"></div><div class="detail-thumbs">${imgs.map((im, i) => `<img src="${im}" alt="${v.name} view ${i + 1}" data-gallery="${im}" tabindex="0">`).join('')}</div>${actual(v.id) ? '' : '<p class="fineprint">Illustrative image only. Request actual vehicle photographs before booking.</p>'}</div><div class="panel reveal"><span class="eyebrow">Vehicle profile</span><h2 style="font-size:48px;margin:20px 0">${v.name}</h2><p>${v.desc}</p><div class="vehicle-meta" style="margin:26px 0"><span>${v.type}</span><span>${v.year}</span><span>${v.seats}</span></div><div style="border-top:1px solid var(--line);padding-top:25px"><span style="font-size:12px;color:var(--muted);letter-spacing:.14em">DAILY RATE</span><h3 style="font-size:32px;margin:7px 0 23px">${v.rate}</h3><a class="btn" href="booking.html?vehicle=${v.id}" style="width:100%">Request this vehicle ↗</a><p class="fineprint">Availability, pricing, driver options and rental terms are confirmed by our team. No numeric rates are published on this site.</p></div></div></div></section><section class="section tight dark-block"><div class="wrap"><span class="eyebrow">Explore more</span><h2 style="margin:20px 0 40px">More ways to <span class="accent italic">move.</span></h2><div class="grid grid-3">${cards(CARS.filter((x) => x.id !== v.id).slice(0, 3))}</div></div></section></main>`;
+  return `<main>${heading('THE COLLECTION', v.name, v.desc)}<section class="section"><div class="wrap detail-layout"><div class="reveal"><div class="detail-photo"><img id="main-car-image" src="${imgs[0]}" alt="${v.name}"></div><div class="detail-thumbs">${imgs.map((im, i) => `<img src="${im}" alt="${v.name} view ${i + 1}" data-gallery="${im}" tabindex="0">`).join('')}</div>${actual(v.id) ? '' : '<p class="fineprint">Illustrative image only. Request actual vehicle photographs before booking.</p>'}</div><div class="panel reveal"><span class="eyebrow">Vehicle profile</span><h2 style="font-size:48px;margin:20px 0">${v.name}</h2><p>${v.desc}</p><div class="vehicle-meta" style="margin:26px 0"><span>${v.type}</span><span>${v.year}</span><span>${v.seats}</span>${(v.specs || []).map((x) => `<span>${x}</span>`).join('')}</div><div style="border-top:1px solid var(--line);padding-top:25px"><span style="font-size:12px;color:var(--muted);letter-spacing:.14em">DAILY RATE</span><h3 style="font-size:32px;margin:7px 0 23px">${v.rate}</h3><a class="btn" href="booking.html?vehicle=${v.id}" style="width:100%">Request this vehicle ↗</a><p class="fineprint">Availability, pricing, driver options and rental terms are confirmed by our team. No numeric rates are published on this site.</p></div></div></div></section><section class="section tight dark-block"><div class="wrap"><span class="eyebrow">Explore more</span><h2 style="margin:20px 0 40px">More ways to <span class="accent italic">move.</span></h2><div class="grid grid-3">${cards(CARS.filter((x) => x.id !== v.id).slice(0, 3))}</div></div></section></main>`;
 }
 
 function booking() {
