@@ -27,7 +27,7 @@ const CARS = [
       { label: 'Local Jhelum', range: 'Rs 12,000 – 15,000', note: '' },
       { label: 'Outside city', range: 'Rs 10,000 – 12,000', note: 'Without fuel' }
     ],
-    image: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=1200&q=85',
+    image: 'assets/haval-h6-front.jpg',
     desc: 'A contemporary SUV with a spacious cabin, striking presence and comfort for everyday and special trips.'
   },
   {
@@ -38,7 +38,7 @@ const CARS = [
     year: 'Model year on request',
     seats: '5 seats',
     rate: 'Price on demand',
-    image: 'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=1200&q=85',
+    image: 'assets/jetour-t2-front.jpg',
     desc: 'Bold, adventure-inspired design with the versatility to make every journey memorable.'
   },
   {
@@ -104,7 +104,7 @@ function heading(k, title, sub) {
 }
 
 function card(v, i = 0) {
-  return `<article class="vehicle reveal delay${i % 3}" data-type="${v.type}"><a href="vehicle.html?id=${v.id}" class="vehicle-img"><img loading="lazy" src="${v.image}" alt="${v.name} — ${actual(v.id) ? 'actual Depart Rides vehicle' : 'illustrative vehicle image'}" onerror="this.style.opacity='.05'"><span class="badge">${actual(v.id) ? 'ACTUAL VEHICLE' : v.type.toUpperCase() + ' COLLECTION'}</span></a><div class="vehicle-body"><h3>${v.name}</h3><p>${v.tag}</p><div class="vehicle-meta"><span>${v.type}</span><span>${v.year}</span></div><div class="vehicle-bottom"><div><small>${v.rates ? 'RENTAL RATE · PKR PER DAY' : 'RENTAL RATE'}</small>${rateHtml(v)}</div><a href="vehicle.html?id=${v.id}" class="arrow" aria-label="Explore ${v.name}">↗</a></div></div></article>`;
+  return `<article class="vehicle reveal delay${i % 3}" data-type="${v.type}"><a href="vehicle.html?id=${v.id}" class="vehicle-img"><img loading="lazy" src="${v.image}" alt="${v.name} — ${actual(v.id) ? 'actual Depart Rides vehicle' : 'photos coming soon'}" onerror="this.style.opacity='.05'"><span class="badge">${actual(v.id) ? 'ACTUAL VEHICLE' : v.type.toUpperCase() + ' COLLECTION'}</span></a><div class="vehicle-body"><h3>${v.name}</h3><p>${v.tag}</p><div class="vehicle-meta"><span>${v.type}</span><span>${v.year}</span></div><div class="vehicle-bottom"><div><small>${v.rates ? 'RENTAL RATE · PKR PER DAY' : 'RENTAL RATE'}</small>${rateHtml(v)}</div><a href="vehicle.html?id=${v.id}" class="arrow" aria-label="Explore ${v.name}">↗</a></div></div></article>`;
 }
 
 function cards(list = CARS) {
@@ -204,13 +204,13 @@ ${cta()}
 }
 
 function fleet() {
-  return `<main>${heading('OUR FLEET', 'Choose your <span class="accent italic">ride.</span>', 'A curated collection for city drives, family adventures, executive travel and everything in between.')}<section class="section"><div class="wrap"><div class="filters" aria-label="Filter vehicles"><button class="chip selected" data-filter="All">All vehicles</button><button class="chip" data-filter="SUV">SUVs</button><button class="chip" data-filter="Luxury">Luxury</button><button class="chip" data-filter="Sedan">Sedans</button></div><div class="grid grid-3" id="fleet-grid">${cards()}</div><p class="fineprint">Note: Images of the Haval H6 and Jetour T2 are illustrative placeholders until actual photos are provided; Corolla XLi photos are coming soon. Rates shown are per day in PKR and are confirmed on inquiry; Jetour T2 and Corolla XLi are Price on demand.</p></div></section>${cta()}</main>`;
+  return `<main>${heading('OUR FLEET', 'Choose your <span class="accent italic">ride.</span>', 'A curated collection for city drives, family adventures, executive travel and everything in between.')}<section class="section"><div class="wrap"><div class="filters" aria-label="Filter vehicles"><button class="chip selected" data-filter="All">All vehicles</button><button class="chip" data-filter="SUV">SUVs</button><button class="chip" data-filter="Luxury">Luxury</button><button class="chip" data-filter="Sedan">Sedans</button></div><div class="grid grid-3" id="fleet-grid">${cards()}</div><p class="fineprint">Note: Photos of the Haval H6, Jetour T2 and Corolla XLi are coming soon. Rates shown are per day in PKR and are confirmed on inquiry; Jetour T2 and Corolla XLi are Price on demand.</p></div></section>${cta()}</main>`;
 }
 
 function vehicle() {
   const v = car(new URLSearchParams(location.search).get('id'));
   const imgs = v.gallery || [v.image];
-  return `<main>${heading('THE COLLECTION', v.name, v.desc)}<section class="section"><div class="wrap detail-layout"><div class="reveal"><div class="detail-photo"><img id="main-car-image" src="${imgs[0]}" alt="${v.name}"></div><div class="detail-thumbs">${imgs.map((im, i) => `<img src="${im}" alt="${v.name} view ${i + 1}" data-gallery="${im}" tabindex="0">`).join('')}</div>${actual(v.id) ? '' : '<p class="fineprint">Illustrative image only. Request actual vehicle photographs before booking.</p>'}</div><div class="panel reveal"><span class="eyebrow">Vehicle profile</span><h2 style="font-size:48px;margin:20px 0">${v.name}</h2><p>${v.desc}</p><div class="vehicle-meta" style="margin:26px 0"><span>${v.type}</span><span>${v.year}</span><span>${v.seats}</span>${(v.specs || []).map((x) => `<span>${x}</span>`).join('')}</div><div style="border-top:1px solid var(--line);padding-top:25px"><span style="font-size:12px;color:var(--muted);letter-spacing:.14em">${v.rates ? 'DAILY RATE · PKR' : 'DAILY RATE'}</span>${v.rates ? rateHtml(v, 'rates rates--lg') : `<h3 style="font-size:32px;margin:7px 0 23px">${v.rate}</h3>`}<a class="btn" href="booking.html?vehicle=${v.id}" style="width:100%">Request this vehicle ↗</a><p class="fineprint">Availability, pricing, driver options and rental terms are confirmed by our team. Listed rates are indicative daily ranges in PKR.</p></div></div></div></section><section class="section tight dark-block"><div class="wrap"><span class="eyebrow">Explore more</span><h2 style="margin:20px 0 40px">More ways to <span class="accent italic">move.</span></h2><div class="grid grid-3">${cards(CARS.filter((x) => x.id !== v.id).slice(0, 3))}</div></div></section></main>`;
+  return `<main>${heading('THE COLLECTION', v.name, v.desc)}<section class="section"><div class="wrap detail-layout"><div class="reveal"><div class="detail-photo"><img id="main-car-image" src="${imgs[0]}" alt="${v.name}"></div><div class="detail-thumbs">${imgs.map((im, i) => `<img src="${im}" alt="${v.name} view ${i + 1}" data-gallery="${im}" tabindex="0">`).join('')}</div>${actual(v.id) ? '' : '<p class="fineprint">Photos of this car are coming soon. Ask us for current photographs before booking.</p>'}</div><div class="panel reveal"><span class="eyebrow">Vehicle profile</span><h2 style="font-size:48px;margin:20px 0">${v.name}</h2><p>${v.desc}</p><div class="vehicle-meta" style="margin:26px 0"><span>${v.type}</span><span>${v.year}</span><span>${v.seats}</span>${(v.specs || []).map((x) => `<span>${x}</span>`).join('')}</div><div style="border-top:1px solid var(--line);padding-top:25px"><span style="font-size:12px;color:var(--muted);letter-spacing:.14em">${v.rates ? 'DAILY RATE · PKR' : 'DAILY RATE'}</span>${v.rates ? rateHtml(v, 'rates rates--lg') : `<h3 style="font-size:32px;margin:7px 0 23px">${v.rate}</h3>`}<a class="btn" href="booking.html?vehicle=${v.id}" style="width:100%">Request this vehicle ↗</a><p class="fineprint">Availability, pricing, driver options and rental terms are confirmed by our team. Listed rates are indicative daily ranges in PKR.</p></div></div></div></section><section class="section tight dark-block"><div class="wrap"><span class="eyebrow">Explore more</span><h2 style="margin:20px 0 40px">More ways to <span class="accent italic">move.</span></h2><div class="grid grid-3">${cards(CARS.filter((x) => x.id !== v.id).slice(0, 3))}</div></div></section></main>`;
 }
 
 function booking() {
@@ -229,7 +229,7 @@ function faq() {
     ['Can I request a driver?', 'Yes, you can mention your driver requirements in the booking inquiry. Availability and any additional charges must be confirmed directly.'],
     ['What documents do I need?', 'Required identification, license and security arrangements depend on the rental type and will be confirmed before booking.'],
     ['Can I change or cancel a booking?', 'Please contact Depart Rides directly. Cancellation and modification conditions will be explained when your booking is confirmed.'],
-    ['Are the photos of the actual cars?', 'The Toyota Land Cruiser V8 and Toyota Prado photographs are of actual vehicles supplied by Depart Rides. Other vehicle images, plus interior and engine stills on the home experience, are illustrative until actual photos are provided.'],
+    ['Are the photos of the actual cars?', 'The Toyota Land Cruiser V8 and Toyota Prado photographs are of actual vehicles supplied by Depart Rides. Photos of the Haval H6, Jetour T2 and Corolla XLi are coming soon. Interior and engine stills on the home page are illustrative stock images.'],
     ['Is my reservation confirmed after I submit the form?', 'No. The current website prepares an inquiry only; it does not check live availability or create confirmed reservations.']
   ];
   return `<main>${heading('GOOD TO KNOW', 'Your questions. <span class="accent italic">Answered.</span>', 'Everything you need to know before setting off.')}<section class="section"><div class="wrap text-content">${data.map(([q, a], i) => `<details class="faq-item reveal" ${i === 0 ? 'open' : ''}><summary>${q}</summary><p>${a}</p></details>`).join('')}</div></section>${cta()}</main>`;
@@ -241,7 +241,7 @@ function contact() {
 
 function legal(which) {
   const terms = which === 'terms';
-  return `<main>${heading(terms ? 'RENTAL INFORMATION' : 'YOUR INFORMATION', terms ? 'Rental <span class="accent italic">terms.</span>' : 'Privacy <span class="accent italic">notice.</span>', terms ? 'Important information to review before confirming a vehicle rental.' : 'How information entered into this demonstration website is handled.')}<section class="section"><div class="wrap text-content reveal">${terms ? `<h2>Reservation process</h2><p>Website inquiries do not constitute a confirmed reservation. Vehicle availability, pickup and return locations, rental charges, driver arrangements and all other terms must be confirmed directly with Depart Rides.</p><h2>Pricing and payments</h2><p>Rental pricing is provided on request. No payment is collected through this website. Any deposit, payment method or refund policy must be agreed directly before rental.</p><h2>Documents and responsibilities</h2><p>Identity verification, driving license requirements, permitted use, insurance, fuel, mileage, damage, traffic violations and cancellation terms will be set out in the final rental agreement.</p><h2>Important</h2><p>This page is an informational placeholder, not a binding rental contract. Replace it with approved business terms before launching publicly.</p>` : `<h2>Information you provide</h2><p>The booking and contact forms collect information that you choose to enter, such as your name, email address, phone number, travel dates and inquiry details.</p><h2>How this demo works</h2><p>This static website does not send form data to a server or store it in a database. Submitting a form prepares an email using your device's email application. The message is sent only if you choose to send it.</p><h2>Third-party resources</h2><p>Some illustrative vehicle images, cinematic interior and engine stills, GSAP libraries, and web fonts may load from external providers. Those providers may receive standard connection information when your browser requests their assets.</p><h2>Before production launch</h2><p>Update this notice with your actual contact details, data handling practices, hosting setup, analytics tools, retention periods and applicable legal requirements.</p>`}</div></section></main>`;
+  return `<main>${heading(terms ? 'RENTAL INFORMATION' : 'YOUR INFORMATION', terms ? 'Rental <span class="accent italic">terms.</span>' : 'Privacy <span class="accent italic">notice.</span>', terms ? 'Important information to review before confirming a vehicle rental.' : 'How information entered into this demonstration website is handled.')}<section class="section"><div class="wrap text-content reveal">${terms ? `<h2>Reservation process</h2><p>Website inquiries do not constitute a confirmed reservation. Vehicle availability, pickup and return locations, rental charges, driver arrangements and all other terms must be confirmed directly with Depart Rides.</p><h2>Pricing and payments</h2><p>Rental pricing is provided on request. No payment is collected through this website. Any deposit, payment method or refund policy must be agreed directly before rental.</p><h2>Documents and responsibilities</h2><p>Identity verification, driving license requirements, permitted use, insurance, fuel, mileage, damage, traffic violations and cancellation terms will be set out in the final rental agreement.</p><h2>Important</h2><p>This page is an informational placeholder, not a binding rental contract. Replace it with approved business terms before launching publicly.</p>` : `<h2>Information you provide</h2><p>The booking and contact forms collect information that you choose to enter, such as your name, email address, phone number, travel dates and inquiry details.</p><h2>How this demo works</h2><p>This static website does not send form data to a server or store it in a database. Submitting a form prepares an email using your device's email application. The message is sent only if you choose to send it.</p><h2>Third-party resources</h2><p>Cinematic interior and engine stills, GSAP libraries, and web fonts may load from external providers. Those providers may receive standard connection information when your browser requests their assets.</p><h2>Before production launch</h2><p>Update this notice with your actual contact details, data handling practices, hosting setup, analytics tools, retention periods and applicable legal requirements.</p>`}</div></section></main>`;
 }
 
 const routes = {
@@ -252,7 +252,7 @@ const routes = {
 
 $('#app').innerHTML = nav() + (routes[page] || home)() + footer();
 document.title = `${({
-  home: 'Drive the Extraordinary',
+  home: 'Car Rentals in Jhelum',
   fleet: 'Our Fleet',
   vehicle: car(new URLSearchParams(location.search).get('id')).name,
   booking: 'Book a Ride',
@@ -262,6 +262,7 @@ document.title = `${({
   terms: 'Rental Terms',
   privacy: 'Privacy'
 })[page] || 'Car Rentals'} | Depart Rides`;
+if (page === 'vehicle') { const vv = car(new URLSearchParams(location.search).get('id')); const md = document.querySelector('meta[name="description"]'); if (md) md.content = `${vv.name} for rent in Jhelum from Depart Rides. ${vv.rates ? vv.rates.map((r) => `${r.label}: ${r.range} per day${r.note ? ` (${r.note.toLowerCase()})` : ''}`).join('; ') + '.' : vv.rate + '.'}`; }
 $('#year').textContent = new Date().getFullYear();
 
 const navEl = $('#nav');
