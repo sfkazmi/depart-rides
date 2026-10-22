@@ -1,10 +1,16 @@
+const PHOTO_CREDITS = {
+  'haval-h6': [['Haval H6 III 007', 'File:Haval_H6_III_007.jpg', 'Jengtingchen', 'CC BY-SA 4.0']],
+  'jetour-t2': [['Jetour Traveller 001', 'File:Jetour_Traveller_001.jpg', 'JustAnotherCarDesigner', 'CC BY-SA 4.0'], ['Jetour Traveller 006', 'File:Jetour_Traveller_006.jpg', 'JustAnotherCarDesigner', 'CC0'], ['Jetour Traveller 012', 'File:Jetour_Traveller_012.jpg', 'JustAnotherCarDesigner', 'CC0']],
+  'corolla-xli': [['Toyota Altis 2.0 V (Attitude Black)', 'File:Toyota_Altis_2.0_V_(Attitude_Black).jpg', 'Captainmorlypogi1959', 'CC BY-SA 4.0']]
+};
+const creditHtml = (id) => (PHOTO_CREDITS[id] || []).map(([t, f, a, l]) => `<a href="https://commons.wikimedia.org/wiki/${encodeURI(f)}" target="_blank" rel="noopener">${t}</a> by ${a}, ${l}${l === 'CC0' ? '' : ' (cropped)'}`).join('; ');
 const CARS = [
   {
     id: 'prado',
     name: 'Toyota Prado',
-    tag: 'Premium SUV',
+    tag: '2024 · Premium SUV',
     type: 'SUV',
-    year: 'Model year on request',
+    year: '2024',
     seats: '7 seats',
     rate: 'On request',
     rates: [
@@ -18,27 +24,29 @@ const CARS = [
   {
     id: 'haval-h6',
     name: 'Haval H6',
-    tag: 'Modern comfort',
+    tag: '2025 · Modern comfort',
     type: 'SUV',
-    year: 'Model year on request',
+    year: '2025',
     seats: '5 seats',
     rate: 'On request',
     rates: [
-      { label: 'Local Jhelum', range: 'Rs 12,000 – 15,000', note: '' },
+      { label: 'Local Jhelum', range: 'Rs 12,000 – 15,000', note: 'With fuel' },
       { label: 'Outside city', range: 'Rs 10,000 – 12,000', note: 'Without fuel' }
     ],
     image: 'assets/haval-h6-front.jpg',
+    gallery: ['assets/haval-h6-front.jpg', 'assets/haval-h6-rear.jpg'],
     desc: 'A contemporary SUV with a spacious cabin, striking presence and comfort for everyday and special trips.'
   },
   {
     id: 'jetour-t2',
     name: 'Jetour T2',
-    tag: 'Adventure SUV',
+    tag: '2026 · Adventure SUV',
     type: 'SUV',
-    year: 'Model year on request',
+    year: '2026',
     seats: '5 seats',
     rate: 'Price on demand',
     image: 'assets/jetour-t2-front.jpg',
+    gallery: ['assets/jetour-t2-front.jpg', 'assets/jetour-t2-rear.jpg', 'assets/jetour-t2-side.jpg'],
     desc: 'Bold, adventure-inspired design with the versatility to make every journey memorable.'
   },
   {
@@ -104,7 +112,7 @@ function heading(k, title, sub) {
 }
 
 function card(v, i = 0) {
-  return `<article class="vehicle reveal delay${i % 3}" data-type="${v.type}"><a href="vehicle.html?id=${v.id}" class="vehicle-img"><img loading="lazy" src="${v.image}" alt="${v.name} — ${actual(v.id) ? 'actual Depart Rides vehicle' : 'photos coming soon'}" onerror="this.style.opacity='.05'"><span class="badge">${actual(v.id) ? 'ACTUAL VEHICLE' : v.type.toUpperCase() + ' COLLECTION'}</span></a><div class="vehicle-body"><h3>${v.name}</h3><p>${v.tag}</p><div class="vehicle-meta"><span>${v.type}</span><span>${v.year}</span></div><div class="vehicle-bottom"><div><small>${v.rates ? 'RENTAL RATE · PKR PER DAY' : 'RENTAL RATE'}</small>${rateHtml(v)}</div><a href="vehicle.html?id=${v.id}" class="arrow" aria-label="Explore ${v.name}">↗</a></div></div></article>`;
+  return `<article class="vehicle reveal delay${i % 3}" data-type="${v.type}"><a href="vehicle.html?id=${v.id}" class="vehicle-img"><img loading="lazy" src="${v.image}" alt="${v.name} — ${actual(v.id) ? 'actual Depart Rides vehicle' : 'illustrative photo of the model'}" onerror="this.style.opacity='.05'"><span class="badge">${actual(v.id) ? 'ACTUAL VEHICLE' : v.type.toUpperCase() + ' COLLECTION'}</span></a><div class="vehicle-body"><h3>${v.name}</h3><p>${v.tag}</p><div class="vehicle-meta"><span>${v.type}</span><span>${v.year}</span></div><div class="vehicle-bottom"><div><small>${v.rates ? 'RENTAL RATE · PKR PER DAY' : 'RENTAL RATE'}</small>${rateHtml(v)}</div><a href="vehicle.html?id=${v.id}" class="arrow" aria-label="Explore ${v.name}">↗</a></div></div></article>`;
 }
 
 function cards(list = CARS) {
@@ -169,7 +177,7 @@ function home() {
           <div class="scene-copy">
             <span class="eyebrow">03 · Rates</span>
             <h2>Clear rates, <span class="accent italic">per day.</span></h2>
-            <p>Our 2018 Land Cruiser V8, photographed on our own fleet. Local Jhelum rates include fuel for the V8 and Prado; outside-city rates are without fuel.</p>
+            <p>Our 2018 Land Cruiser V8, photographed on our own fleet. Local Jhelum rates include fuel for the V8, Prado and Haval H6; outside-city rates are without fuel.</p>
           </div>
           <div class="counters">
             <div class="counter"><strong><span data-count="5">00</span></strong><span>Cars in the fleet</span></div>
@@ -196,30 +204,30 @@ function home() {
   </div>
 </section>
 <section class="reel" aria-label="Fleet motion reel">
-  <video src="assets/fleet-gwm-video.mp4" autoplay muted loop playsinline></video>
-  <div class="reel-copy"><div class="wrap"><span class="eyebrow">On the road</span><h2>Motion, <span class="accent italic">unhurried.</span></h2><p>GWM footage from the fleet archive.</p></div></div>
+  <video src="assets/fleet-reel.mp4" poster="assets/fleet-reel-poster.jpg" autoplay muted loop playsinline></video>
+  <div class="reel-copy"><div class="wrap"><span class="eyebrow">Our own cars</span><h2>The Depart Rides <span class="accent italic">fleet.</span></h2><p>Studio photographs of our Land Cruiser V8, Prado and Haval H6.</p></div></div>
 </section>
 ${cta()}
 </main>`;
 }
 
 function fleet() {
-  return `<main>${heading('OUR FLEET', 'Choose your <span class="accent italic">ride.</span>', 'A curated collection for city drives, family adventures, executive travel and everything in between.')}<section class="section"><div class="wrap"><div class="filters" aria-label="Filter vehicles"><button class="chip selected" data-filter="All">All vehicles</button><button class="chip" data-filter="SUV">SUVs</button><button class="chip" data-filter="Luxury">Luxury</button><button class="chip" data-filter="Sedan">Sedans</button></div><div class="grid grid-3" id="fleet-grid">${cards()}</div><p class="fineprint">Note: Photos of the Haval H6, Jetour T2 and Corolla XLi are coming soon. Rates shown are per day in PKR and are confirmed on inquiry; Jetour T2 and Corolla XLi are Price on demand.</p></div></section>${cta()}</main>`;
+  return `<main>${heading('OUR FLEET', 'Choose your <span class="accent italic">ride.</span>', 'A curated collection for city drives, family adventures, executive travel and everything in between.')}<section class="section"><div class="wrap"><div class="filters" aria-label="Filter vehicles"><button class="chip selected" data-filter="All">All vehicles</button><button class="chip" data-filter="SUV">SUVs</button><button class="chip" data-filter="Luxury">Luxury</button><button class="chip" data-filter="Sedan">Sedans</button></div><div class="grid grid-3" id="fleet-grid">${cards()}</div><p class="fineprint">Note: Land Cruiser V8 and Prado photos show our actual vehicles; Haval H6, Jetour T2 and Corolla XLi photos are illustrative photos of the model from Wikimedia Commons. Photo credits: ${Object.keys(PHOTO_CREDITS).map(creditHtml).join('; ')}. Licences: <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a> / CC0. Rates shown are per day in PKR and are confirmed on inquiry; Jetour T2 and Corolla XLi are Price on demand.</p></div></section>${cta()}</main>`;
 }
 
 function vehicle() {
   const v = car(new URLSearchParams(location.search).get('id'));
   const imgs = v.gallery || [v.image];
-  return `<main>${heading('THE COLLECTION', v.name, v.desc)}<section class="section"><div class="wrap detail-layout"><div class="reveal"><div class="detail-photo"><img id="main-car-image" src="${imgs[0]}" alt="${v.name}"></div><div class="detail-thumbs">${imgs.map((im, i) => `<img src="${im}" alt="${v.name} view ${i + 1}" data-gallery="${im}" tabindex="0">`).join('')}</div>${actual(v.id) ? '' : '<p class="fineprint">Photos of this car are coming soon. Ask us for current photographs before booking.</p>'}</div><div class="panel reveal"><span class="eyebrow">Vehicle profile</span><h2 style="font-size:48px;margin:20px 0">${v.name}</h2><p>${v.desc}</p><div class="vehicle-meta" style="margin:26px 0"><span>${v.type}</span><span>${v.year}</span><span>${v.seats}</span>${(v.specs || []).map((x) => `<span>${x}</span>`).join('')}</div><div style="border-top:1px solid var(--line);padding-top:25px"><span style="font-size:12px;color:var(--muted);letter-spacing:.14em">${v.rates ? 'DAILY RATE · PKR' : 'DAILY RATE'}</span>${v.rates ? rateHtml(v, 'rates rates--lg') : `<h3 style="font-size:32px;margin:7px 0 23px">${v.rate}</h3>`}<a class="btn" href="booking.html?vehicle=${v.id}" style="width:100%">Request this vehicle ↗</a><p class="fineprint">Availability, pricing, driver options and rental terms are confirmed by our team. Listed rates are indicative daily ranges in PKR.</p></div></div></div></section><section class="section tight dark-block"><div class="wrap"><span class="eyebrow">Explore more</span><h2 style="margin:20px 0 40px">More ways to <span class="accent italic">move.</span></h2><div class="grid grid-3">${cards(CARS.filter((x) => x.id !== v.id).slice(0, 3))}</div></div></section></main>`;
+  return `<main>${heading('THE COLLECTION', v.name, v.desc)}<section class="section"><div class="wrap detail-layout"><div class="reveal"><div class="detail-photo"><img id="main-car-image" src="${imgs[0]}" alt="${v.name}"></div><div class="detail-thumbs">${imgs.map((im, i) => `<img src="${im}" alt="${v.name} view ${i + 1}" data-gallery="${im}" tabindex="0">`).join('')}</div>${actual(v.id) ? '' : `<p class="fineprint">Illustrative photos of this model from Wikimedia Commons: ${creditHtml(v.id)}. Ask us for photographs of the actual car before booking.</p>`}</div><div class="panel reveal"><span class="eyebrow">Vehicle profile</span><h2 style="font-size:48px;margin:20px 0">${v.name}</h2><p>${v.desc}</p><div class="vehicle-meta" style="margin:26px 0"><span>${v.type}</span><span>${v.year}</span><span>${v.seats}</span>${(v.specs || []).map((x) => `<span>${x}</span>`).join('')}</div><div style="border-top:1px solid var(--line);padding-top:25px"><span style="font-size:12px;color:var(--muted);letter-spacing:.14em">${v.rates ? 'DAILY RATE · PKR' : 'DAILY RATE'}</span>${v.rates ? rateHtml(v, 'rates rates--lg') : `<h3 style="font-size:32px;margin:7px 0 23px">${v.rate}</h3>`}<a class="btn" href="booking.html?vehicle=${v.id}" style="width:100%">Request this vehicle ↗</a><p class="fineprint">Availability, pricing, driver options and rental terms are confirmed by our team. Listed rates are indicative daily ranges in PKR.</p></div></div></div></section><section class="section tight dark-block"><div class="wrap"><span class="eyebrow">Explore more</span><h2 style="margin:20px 0 40px">More ways to <span class="accent italic">move.</span></h2><div class="grid grid-3">${cards(CARS.filter((x) => x.id !== v.id).slice(0, 3))}</div></div></section></main>`;
 }
 
 function booking() {
   const pre = new URLSearchParams(location.search).get('vehicle') || '';
-  return `<main>${heading('BOOK YOUR JOURNEY', 'Let’s get <span class="accent italic">moving.</span>', 'Tell us where, when and what you’d love to drive. Send an inquiry in just a few steps.')}<section class="section"><div class="wrap detail-layout"><div class="panel reveal"><h3>Request a reservation</h3><p>We’ll prepare your inquiry. This demo does not automatically reserve a car or process payments.</p><form id="booking-form" class="form two"><label>Full name *<input required name="name" placeholder="Your full name" maxlength="100"></label><label>Email *<input required type="email" name="email" placeholder="you@example.com"></label><label>Phone / WhatsApp *<input required name="phone" placeholder="+92 ..."></label><label>Preferred vehicle *<select name="vehicle" required><option value="">Select a vehicle</option>${CARS.map((v) => `<option value="${v.id}" ${pre === v.id ? 'selected' : ''}>${v.name}</option>`).join('')}</select></label><label>Pickup date *<input required name="pickup" type="date" id="pickup-date"></label><label>Return date *<input required name="return" type="date" id="return-date"></label><label class="full">Pickup location *<input required name="location" placeholder="City / pickup point"></label><label class="full">Your message (optional)<textarea name="message" placeholder="Driver requirements, itinerary, additional questions..."></textarea></label><div class="full" id="form-feedback" role="status"></div><button class="btn full" type="submit">Prepare booking inquiry ↗</button></form></div><div class="reveal"><div class="feature"><span class="num">HOW IT WORKS</span><h3>01. Select your ride</h3><p>Pick from our fleet of SUVs, luxury vehicles and sedans.</p><h3>02. Share your details</h3><p>Enter your travel dates, location and contact information.</p><h3>03. Confirm directly</h3><p>Review your inquiry and send it through your own email app. Final booking requires confirmation from Depart Rides.</p></div><p class="fineprint">No payment is collected on this website. A real-time booking engine, email service and payment processing require backend setup.</p></div></div></section></main>`;
+  return `<main>${heading('BOOK YOUR JOURNEY', 'Let’s get <span class="accent italic">moving.</span>', 'Tell us where, when and what you’d love to drive. Send an inquiry in just a few steps.')}<section class="section"><div class="wrap detail-layout"><div class="panel reveal"><h3>Request a reservation</h3><p>We’ll prepare your inquiry. Sending an inquiry does not reserve a car or take any payment.</p><form id="booking-form" class="form two"><label>Full name *<input required name="name" placeholder="Your full name" maxlength="100"></label><label>Email *<input required type="email" name="email" placeholder="you@example.com"></label><label>Phone / WhatsApp *<input required name="phone" placeholder="+92 ..."></label><label>Preferred vehicle *<select name="vehicle" required><option value="">Select a vehicle</option>${CARS.map((v) => `<option value="${v.id}" ${pre === v.id ? 'selected' : ''}>${v.name}</option>`).join('')}</select></label><label>Pickup date *<input required name="pickup" type="date" id="pickup-date"></label><label>Return date *<input required name="return" type="date" id="return-date"></label><label class="full">Pickup location *<input required name="location" placeholder="City / pickup point"></label><label class="full">Your message (optional)<textarea name="message" placeholder="Driver requirements, itinerary, additional questions..."></textarea></label><div class="full" id="form-feedback" role="status"></div><button class="btn full" type="submit">Prepare booking inquiry ↗</button></form></div><div class="reveal"><div class="feature"><span class="num">HOW IT WORKS</span><h3>01. Select your ride</h3><p>Pick from our SUVs, the Land Cruiser V8 or the Corolla XLi sedan.</p><h3>02. Share your details</h3><p>Enter your travel dates, location and contact information.</p><h3>03. Confirm directly</h3><p>Review your inquiry and send it through your own email app. Final booking requires confirmation from Depart Rides.</p></div><p class="fineprint">No payment is collected on this website. Payment and any deposit are arranged directly with Depart Rides once your booking is confirmed.</p></div></div></section></main>`;
 }
 
 function about() {
-  return `<main>${heading('OUR STORY', 'Built for <span class="accent italic">the drive.</span>', 'A simple idea: every journey deserves a vehicle that feels right.')}<section class="section"><div class="wrap detail-layout"><div class="reveal"><span class="eyebrow">Who we are</span><h2 style="margin-top:25px">The journey<br>is the <span class="accent italic">point.</span></h2><p>Depart Rides is a car rental brand focused on making it easier to find the right vehicle for your plans. Our fleet spans premium SUVs, a modern family SUV, a versatile sedan and the commanding Toyota Land Cruiser V8.</p><p>We believe the rental experience should feel considered, clear and personal—from the first inquiry to the final handover.</p><a class="btn" href="fleet.html">Meet the fleet ↗</a></div><div class="detail-photo reveal"><img src="assets/land-cruiser-front.jpg" alt="Actual Depart Rides Land Cruiser V8"></div></div></section><section class="section dark-block"><div class="wrap"><span class="eyebrow">Our approach</span><div class="grid grid-3" style="margin-top:30px"><div class="feature reveal"><span class="num">01</span><h3>Choice</h3><p>A thoughtfully selected range of vehicles for different travel needs.</p></div><div class="feature reveal delay1"><span class="num">02</span><h3>Clarity</h3><p>Transparent inquiry-based pricing and terms confirmed before your trip.</p></div><div class="feature reveal delay2"><span class="num">03</span><h3>Experience</h3><p>Attention to the details that make each journey easier.</p></div></div></div></section>${cta()}</main>`;
+  return `<main>${heading('OUR STORY', 'Built for <span class="accent italic">the drive.</span>', 'A simple idea: every journey deserves a vehicle that feels right.')}<section class="section"><div class="wrap detail-layout"><div class="reveal"><span class="eyebrow">Who we are</span><h2 style="margin-top:25px">The journey<br>is the <span class="accent italic">point.</span></h2><p>Depart Rides is a car rental brand focused on making it easier to find the right vehicle for your plans. Our fleet is the Toyota Land Cruiser V8, Toyota Prado, Haval H6, Jetour T2 and Toyota Corolla XLi.</p><p>We believe the rental experience should feel considered, clear and personal—from the first inquiry to the final handover.</p><a class="btn" href="fleet.html">Meet the fleet ↗</a></div><div class="detail-photo reveal"><img src="assets/land-cruiser-front.jpg" alt="Actual Depart Rides Land Cruiser V8"></div></div></section><section class="section dark-block"><div class="wrap"><span class="eyebrow">Our approach</span><div class="grid grid-3" style="margin-top:30px"><div class="feature reveal"><span class="num">01</span><h3>Choice</h3><p>A thoughtfully selected range of vehicles for different travel needs.</p></div><div class="feature reveal delay1"><span class="num">02</span><h3>Clarity</h3><p>Transparent inquiry-based pricing and terms confirmed before your trip.</p></div><div class="feature reveal delay2"><span class="num">03</span><h3>Experience</h3><p>Attention to the details that make each journey easier.</p></div></div></div></section>${cta()}</main>`;
 }
 
 function faq() {
@@ -229,8 +237,8 @@ function faq() {
     ['Can I request a driver?', 'Yes, you can mention your driver requirements in the booking inquiry. Availability and any additional charges must be confirmed directly.'],
     ['What documents do I need?', 'Required identification, license and security arrangements depend on the rental type and will be confirmed before booking.'],
     ['Can I change or cancel a booking?', 'Please contact Depart Rides directly. Cancellation and modification conditions will be explained when your booking is confirmed.'],
-    ['Are the photos of the actual cars?', 'The Toyota Land Cruiser V8 and Toyota Prado photographs are of actual vehicles supplied by Depart Rides. Photos of the Haval H6, Jetour T2 and Corolla XLi are coming soon. Interior and engine stills on the home page are illustrative stock images.'],
-    ['Is my reservation confirmed after I submit the form?', 'No. The current website prepares an inquiry only; it does not check live availability or create confirmed reservations.']
+    ['Are the photos of the actual cars?', 'The Toyota Land Cruiser V8 and Toyota Prado photographs are of actual vehicles supplied by Depart Rides. Photos of the Haval H6, Jetour T2 and Corolla XLi are illustrative photos of each model from Wikimedia Commons. Interior and engine stills on the home page are illustrative stock images.'],
+    ['Is my reservation confirmed after I submit the form?', 'No. The form prepares an inquiry only. Our team confirms availability and your booking directly.']
   ];
   return `<main>${heading('GOOD TO KNOW', 'Your questions. <span class="accent italic">Answered.</span>', 'Everything you need to know before setting off.')}<section class="section"><div class="wrap text-content">${data.map(([q, a], i) => `<details class="faq-item reveal" ${i === 0 ? 'open' : ''}><summary>${q}</summary><p>${a}</p></details>`).join('')}</div></section>${cta()}</main>`;
 }
@@ -241,7 +249,7 @@ function contact() {
 
 function legal(which) {
   const terms = which === 'terms';
-  return `<main>${heading(terms ? 'RENTAL INFORMATION' : 'YOUR INFORMATION', terms ? 'Rental <span class="accent italic">terms.</span>' : 'Privacy <span class="accent italic">notice.</span>', terms ? 'Important information to review before confirming a vehicle rental.' : 'How information entered into this demonstration website is handled.')}<section class="section"><div class="wrap text-content reveal">${terms ? `<h2>Reservation process</h2><p>Website inquiries do not constitute a confirmed reservation. Vehicle availability, pickup and return locations, rental charges, driver arrangements and all other terms must be confirmed directly with Depart Rides.</p><h2>Pricing and payments</h2><p>Rental pricing is provided on request. No payment is collected through this website. Any deposit, payment method or refund policy must be agreed directly before rental.</p><h2>Documents and responsibilities</h2><p>Identity verification, driving license requirements, permitted use, insurance, fuel, mileage, damage, traffic violations and cancellation terms will be set out in the final rental agreement.</p><h2>Important</h2><p>This page is an informational placeholder, not a binding rental contract. Replace it with approved business terms before launching publicly.</p>` : `<h2>Information you provide</h2><p>The booking and contact forms collect information that you choose to enter, such as your name, email address, phone number, travel dates and inquiry details.</p><h2>How this demo works</h2><p>This static website does not send form data to a server or store it in a database. Submitting a form prepares an email using your device's email application. The message is sent only if you choose to send it.</p><h2>Third-party resources</h2><p>Cinematic interior and engine stills, GSAP libraries, and web fonts may load from external providers. Those providers may receive standard connection information when your browser requests their assets.</p><h2>Before production launch</h2><p>Update this notice with your actual contact details, data handling practices, hosting setup, analytics tools, retention periods and applicable legal requirements.</p>`}</div></section></main>`;
+  return `<main>${heading(terms ? 'RENTAL INFORMATION' : 'YOUR INFORMATION', terms ? 'Rental <span class="accent italic">terms.</span>' : 'Privacy <span class="accent italic">notice.</span>', terms ? 'Important information to review before confirming a vehicle rental.' : 'How information you enter on this website is handled.')}<section class="section"><div class="wrap text-content reveal">${terms ? `<h2>Reservation process</h2><p>Website inquiries do not constitute a confirmed reservation. Vehicle availability, pickup and return locations, rental charges, driver arrangements and all other terms must be confirmed directly with Depart Rides.</p><h2>Pricing and payments</h2><p>Indicative daily rates are listed on the fleet pages; final pricing is confirmed on inquiry. No payment is collected through this website. Any deposit, payment method or refund policy must be agreed directly before rental.</p><h2>Documents and responsibilities</h2><p>Identity verification, driving license requirements, permitted use, insurance, fuel, mileage, damage, traffic violations and cancellation terms will be set out in the final rental agreement.</p><h2>Important</h2><p>This page is general guidance, not a binding rental contract. The full terms are set out in the rental agreement provided when your booking is confirmed.</p>` : `<h2>Information you provide</h2><p>The booking and contact forms collect information that you choose to enter, such as your name, email address, phone number, travel dates and inquiry details.</p><h2>How the forms work</h2><p>This website does not send form data to a server or store it in a database. Submitting a form prepares an email using your device's email application. The message is sent only if you choose to send it.</p><h2>Third-party resources</h2><p>Animation libraries (GSAP) and web fonts load from external providers. Those providers may receive standard connection information when your browser requests their assets.</p><h2>Questions</h2><p>For any question about your information, contact Depart Rides through the contact page.</p>`}</div></section></main>`;
 }
 
 const routes = {
@@ -262,7 +270,7 @@ document.title = `${({
   terms: 'Rental Terms',
   privacy: 'Privacy'
 })[page] || 'Car Rentals'} | Depart Rides`;
-if (page === 'vehicle') { const vv = car(new URLSearchParams(location.search).get('id')); const md = document.querySelector('meta[name="description"]'); if (md) md.content = `${vv.name} for rent in Jhelum from Depart Rides. ${vv.rates ? vv.rates.map((r) => `${r.label}: ${r.range} per day${r.note ? ` (${r.note.toLowerCase()})` : ''}`).join('; ') + '.' : vv.rate + '.'}`; }
+if (page === 'vehicle') { const vv = car(new URLSearchParams(location.search).get('id')); const md = document.querySelector('meta[name="description"]'); const cu = `https://departrides.com/vehicle.html?id=${vv.id}`; document.querySelectorAll('link[rel="canonical"],meta[property="og:url"]').forEach((el) => { el.setAttribute(el.tagName === 'LINK' ? 'href' : 'content', cu); }); const ogi = document.querySelector('meta[property="og:image"]'); if (ogi) ogi.content = `https://departrides.com/${vv.image}`; if (md) md.content = `${vv.name} for rent in Jhelum from Depart Rides. ${vv.rates ? vv.rates.map((r) => `${r.label}: ${r.range} per day${r.note ? ` (${r.note.toLowerCase()})` : ''}`).join('; ') + '.' : vv.rate + '.'}`; }
 $('#year').textContent = new Date().getFullYear();
 
 const navEl = $('#nav');

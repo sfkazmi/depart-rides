@@ -8,7 +8,7 @@ Live: https://sfkazmi.github.io/depart-rides/
 Home, Fleet, Vehicle Detail (dynamic query parameter), Booking Inquiry, About, FAQ, Contact, Rental Terms, Privacy.
 
 ## Actual fleet
-Toyota Prado, Haval H6, Jetour T2, Toyota Corolla XLi 2015 (black), Toyota Land Cruiser V8 2018.
+Toyota Prado 2024, Haval H6 2025, Jetour T2 2026, Toyota Corolla XLi 2014 (black), Toyota Land Cruiser V8 2018.
 
 ## Pricing
 No numeric rental rates exist in the original site data. Every vehicle is labelled **On request** (the copy already used on fleet and vehicle pages). The cinematic home “pricing” strip uses that same label — it does not invent prices.
@@ -16,7 +16,7 @@ No numeric rental rates exist in the original site data. Every vehicle is labell
 Performance counters on the home sequence use facts already on the site: 5 fleet vehicles, Prado 7 seats, 24/7 inquiry, 2018 flagship V8 year.
 
 ## Images
-The Land Cruiser V8 and Prado photographs in `assets/` are real images provided by the business. Images for other vehicles are third-party illustrative placeholders and require an internet connection. Replace them with actual vehicle images before launch.
+The Land Cruiser V8 and Prado photographs in `assets/` are real images provided by the business. Haval H6, Jetour T2 and Corolla XLi images are freely licensed illustrative photos of each model from Wikimedia Commons (see credits below), stored locally in `assets/`. Replace them with photos of the actual cars when available.
 
 ### Stock interior and engine stills
 Cabin and engine photography of the actual fleet does not exist in `assets/`. The home sequence uses downloaded, free-license stills (illustrative only — not Depart Rides vehicles):
@@ -42,5 +42,17 @@ The home page is a pinned, scroll-driven cinematic sequence (GSAP + ScrollTrigge
 Edit fleet details in `assets/app.js` under `CARS`, cinematic motion in `assets/cinematic.js`, and visual styles in `assets/style.css`.
 
 ## Newly provided media
+- Haval H6: owner-supplied studio rear photo `assets/haval-h6-rear.jpg` (in its gallery and the reel).
 - Toyota Prado: three actual photos in assets/prado-*.jpg, included in its vehicle gallery.
-- Additional GWM vehicle video: assets/fleet-gwm-video.mp4. Model not independently verified; used as a motion reel on the home page.
+- Home page motion reel: `assets/fleet-reel.mp4` (+ `fleet-reel-poster.jpg`), built with ffmpeg (Ken Burns zooms/pans, crossfades) from the business's own studio photos `land-cruiser-*`, `prado-*`, `v8-*` and `haval-h6-rear.jpg`. 1920x1080, ~20s, H.264, no audio. Replaces the former GWM video, which was removed because it showed bystanders.
+
+## Wikimedia Commons photo credits
+Shown on the site (fleet page note and each vehicle page). Images were resized/cropped; the Jetour front photo has background bystanders blurred.
+
+| File | Source | Author | License |
+|---|---|---|---|
+| `assets/haval-h6-front.jpg` | [File:Haval_H6_III_007.jpg](https://commons.wikimedia.org/wiki/File:Haval_H6_III_007.jpg) | Jengtingchen | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
+| `assets/jetour-t2-front.jpg` | [File:Jetour_Traveller_001.jpg](https://commons.wikimedia.org/wiki/File:Jetour_Traveller_001.jpg) | JustAnotherCarDesigner | CC BY-SA 4.0 |
+| `assets/jetour-t2-rear.jpg` | [File:Jetour_Traveller_006.jpg](https://commons.wikimedia.org/wiki/File:Jetour_Traveller_006.jpg) | JustAnotherCarDesigner | CC0 |
+| `assets/jetour-t2-side.jpg` | [File:Jetour_Traveller_012.jpg](https://commons.wikimedia.org/wiki/File:Jetour_Traveller_012.jpg) | JustAnotherCarDesigner | CC0 |
+| `assets/corolla-xli-front.jpg` | [File:Toyota_Altis_2.0_V_(Attitude_Black).jpg](https://commons.wikimedia.org/wiki/File:Toyota_Altis_2.0_V_(Attitude_Black).jpg) | Captainmorlypogi1959 | CC BY-SA 4.0 |
