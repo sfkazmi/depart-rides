@@ -29,7 +29,7 @@ body:before {
   inset: 0;
   pointer-events: none;
   z-index: 40;
-  opacity: .11;
+  opacity: .08;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 a { color: inherit; text-decoration: none; }
@@ -325,7 +325,7 @@ p { color: var(--muted); }
 .chip:hover, .chip.selected { background: var(--lime); color: #101510; border-color: var(--lime); }
 .detail-layout { display: grid; grid-template-columns: 1.25fr .75fr; gap: 38px; }
 .detail-photo { border-radius: 25px; overflow: hidden; background: #19231c; min-height: 400px; }
-.detail-photo img { width: 100%; height: 100%; object-fit: cover; }
+.detail-photo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 70%; }
 .detail-thumbs { display: flex; gap: 10px; margin-top: 12px; }
 .detail-thumbs img {
   width: 120px; height: 82px;
@@ -483,13 +483,13 @@ p { color: var(--muted); }
   height: 100%;
   object-fit: cover;
   object-position: center;
-  filter: brightness(.62) contrast(1.15) saturate(.7);
+  filter: brightness(.88) contrast(1.08) saturate(.85);
   -webkit-mask-image: none;
   mask-image: none;
 }
 .cinema-front img {
   object-position: 50% 70%;
-  filter: brightness(.7) contrast(1.2) saturate(.72);
+  filter: brightness(.82) contrast(1.16) saturate(.8);
 }
 .cinema-vignette {
   position: absolute;
@@ -552,6 +552,13 @@ p { color: var(--muted); }
   padding: 0 0 88px;
   pointer-events: none;
 }
+.scene:before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, #020303f0 0%, #02030388 38%, transparent 72%);
+}
 .scene .wrap, .scene a, .scene button { pointer-events: auto; }
 .scene-hero { justify-content: center; padding-top: 70px; }
 .scene-hero h1 { max-width: 920px; margin: 22px 0 18px; }
@@ -598,8 +605,8 @@ p { color: var(--muted); }
   grid-template-columns: 86px 1fr;
   gap: 14px;
   padding: 14px;
-  border: 1px solid #2a352e;
-  background: #0b100ecc;
+  border: 1px solid #3a4a40;
+  background: #07100ce8;
   backdrop-filter: blur(16px);
   border-radius: 16px;
 }
@@ -619,49 +626,68 @@ p { color: var(--muted); }
 .lux-panel p { margin: 0; font-size: 12px; line-height: 1.45; }
 
 .scene-perf { justify-content: flex-end; }
-.perf-layout {
-  display: grid;
-  grid-template-columns: 1fr 1.15fr;
-  gap: 40px;
-  align-items: end;
+.scene-perf-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  position: relative;
+  z-index: 1;
 }
+.scene-copy, .lux-panels { position: relative; z-index: 1; }
 .counters {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18px 28px;
-  margin-top: 22px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+.counter {
+  padding: 14px 16px;
+  border: 1px solid #3a4a40;
+  background: #07100ce8;
+  backdrop-filter: blur(16px);
+  border-radius: 14px;
 }
 .counter strong {
   display: block;
-  font: 600 64px/1 'Cormorant Garamond', serif;
+  font: 600 clamp(28px, 3.4vw, 44px)/1 'Cormorant Garamond', serif;
   color: var(--ink);
+  white-space: nowrap;
 }
-.counter strong em { font-style: normal; color: var(--lime); }
-.counter span {
+.counter strong span {
+  display: inline;
+  font: inherit;
+  letter-spacing: 0;
+  text-transform: none;
+  color: inherit;
+  margin: 0;
+}
+.counter strong em { font-style: normal; color: var(--lime); font-size: .72em; }
+.counter > span {
   display: block;
-  margin-top: 4px;
-  font-size: 11px;
-  letter-spacing: .16em;
+  margin-top: 6px;
+  font-size: 10px;
+  letter-spacing: .14em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: #c5cdc4;
 }
 .price-note {
   font-size: 12px;
-  max-width: 420px;
-  margin: 0 0 16px;
+  max-width: 720px;
+  margin: 0;
+  color: #d5ddd4;
 }
+.price-note strong { color: var(--lime); font-weight: 700; }
 .price-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(5, 1fr);
   gap: 10px;
 }
 .price-card {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 16px 18px;
-  border: 1px solid #2d3831;
-  background: #0c110fcc;
+  padding: 14px 16px;
+  border: 1px solid #3a4a40;
+  background: #07100ce8;
   backdrop-filter: blur(14px);
   border-radius: 14px;
   transition: border-color .25s, transform .25s;
@@ -708,7 +734,9 @@ p { color: var(--muted); }
   .links { gap: 16px; }
   .links a { font-size: 11px; }
   .footer-main { gap: 25px; }
-  .scene-cabin-grid, .perf-layout { grid-template-columns: 1fr; gap: 22px; }
+  .scene-cabin-grid { grid-template-columns: 1fr; gap: 22px; }
+  .price-grid { grid-template-columns: repeat(2, 1fr); }
+  .counters { grid-template-columns: repeat(2, 1fr); }
   .cinema-track { height: auto; }
   .cinema-letterbox { height: 28px; }
   .lux-panel { grid-template-columns: 64px 1fr; }
@@ -754,8 +782,24 @@ p { color: var(--muted); }
   .scene-hero { justify-content: flex-end; }
   .scene-hero h1 { font-size: clamp(52px, 16vw, 84px); }
   .scroll-hint { display: none; }
-  .lux-panels, .price-grid, .counters { grid-template-columns: 1fr 1fr; }
-  .counter strong { font-size: 42px; }
+  .lux-panels { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .lux-panel p { display: none; }
+  .lux-panel { padding: 10px; }
+  .price-grid, .counters { grid-template-columns: 1fr 1fr; }
+  .price-grid .price-card:last-child { grid-column: 1 / -1; }
+  .counter { padding: 10px 12px; }
+  .counter strong { font-size: 30px; }
+  .price-card { padding: 10px 12px; }
+  .price-note { font-size: 11px; }
+  .scene-perf .scene-copy p { display: none; }
+  .scene-perf h2 { font-size: clamp(34px, 10vw, 46px); }
+  .scene-perf-inner { gap: 10px; }
+  .scene:before {
+    background: linear-gradient(180deg, #02030377 0%, #02030344 50%, #020303aa 100%);
+  }
+  .scene { padding-bottom: 52px; }
+  .scene-hero { justify-content: flex-end; padding-bottom: 52px; }
+  .cinema-letterbox { height: 18px; }
   .reel video { height: 52vh; }
 }
 
@@ -782,7 +826,7 @@ html.cinema-static .scene-hero {
 html.cinema-static .scene-cabin {
   background:
     linear-gradient(90deg, #050706f0 0%, #05070688 50%, #05070655),
-    url('stock-leather.jpg') center/cover;
+    url('stock-cabin.jpg') center/cover;
 }
 html.cinema-static .scene-perf {
   background:

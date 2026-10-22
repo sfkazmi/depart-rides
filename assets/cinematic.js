@@ -48,8 +48,8 @@
 
   const chapters = [
     { at: 0, text: '01  ·  ARRIVAL' },
-    { at: 0.28, text: '02  ·  THE CABIN' },
-    { at: 0.68, text: '03  ·  THE MACHINE' }
+    { at: 0.32, text: '02  ·  THE CABIN' },
+    { at: 0.6, text: '03  ·  THE MACHINE' }
   ];
 
   let countersFired = false;
@@ -74,7 +74,7 @@
         invalidateOnRefresh: true,
         onUpdate(self) {
           setChapter(self.progress);
-          if (self.progress > 0.78 && !countersFired) {
+          if (self.progress > 0.7 && !countersFired) {
             countersFired = true;
             animateCounters(false);
           }
@@ -82,26 +82,25 @@
       }
     });
 
-    tl.to(hero, { autoAlpha: 0, y: -30, duration: 0.12 }, 0.16)
+    tl.to(hero, { autoAlpha: 0, y: -24, duration: 0.1 }, 0.12)
       .to(side, {
         scale: scaleMax,
-        xPercent: -6,
+        xPercent: -8,
         transformOrigin: origin,
-        duration: 0.28
-      }, 0.12)
-      .to(interior, { autoAlpha: 1, scale: 1.08, duration: 0.16 }, 0.26)
-      .to(side, { autoAlpha: 0, duration: 0.12 }, 0.3)
-      .to(cabinScene, { autoAlpha: 1, duration: 0.1 }, 0.32)
-      .to(panels, { autoAlpha: 1, y: 0, stagger: 0.04, duration: 0.12 }, 0.34)
-      .to(cabin, { autoAlpha: 0.55, duration: 0.12 }, 0.46)
-      .to(interior, { autoAlpha: 0.35, duration: 0.12 }, 0.5)
-      .to(cabinScene, { autoAlpha: 0, duration: 0.1 }, 0.62)
-      .to([interior, cabin], { autoAlpha: 0, duration: 0.1 }, 0.64)
-      .to(front, { autoAlpha: 1, scale: 1.12, duration: 0.16 }, 0.66)
-      .to(front, { scale: 1.28, duration: 0.12 }, 0.78)
-      .to(engine, { autoAlpha: 0.92, duration: 0.12 }, 0.8)
-      .to(perfScene, { autoAlpha: 1, duration: 0.1 }, 0.78)
-      .to([front, engine], { scale: 1.05, duration: 0.12 }, 0.9);
+        duration: 0.3
+      }, 0.08)
+      .to(interior, { autoAlpha: 1, scale: 1.04, duration: 0.12 }, 0.34)
+      .to(side, { autoAlpha: 0, duration: 0.1 }, 0.38)
+      .to(cabinScene, { autoAlpha: 1, duration: 0.08 }, 0.36)
+      .to(panels, { autoAlpha: 1, y: 0, stagger: 0.03, duration: 0.1 }, 0.38)
+      .to(cabin, { autoAlpha: 0.28, duration: 0.1 }, 0.48)
+      .to(cabinScene, { autoAlpha: 0, duration: 0.08 }, 0.6)
+      .to([interior, cabin], { autoAlpha: 0, duration: 0.1 }, 0.62)
+      .to(front, { autoAlpha: 1, scale: 1.08, duration: 0.14 }, 0.62)
+      .to(front, { scale: 1.22, duration: 0.1 }, 0.74)
+      .to(engine, { autoAlpha: 0.72, duration: 0.1 }, 0.78)
+      .to(perfScene, { autoAlpha: 1, duration: 0.08 }, 0.76)
+      .to([front, engine], { scale: 1.06, duration: 0.1 }, 0.9);
 
     return tl;
   }

@@ -112,8 +112,8 @@ function home() {
       <div class="cinema-stage" id="cinema-stage">
         <div class="cinema-layer cinema-bg"></div>
         <div class="cinema-layer cinema-side" data-layer="side"><img src="assets/land-cruiser-side.jpg" alt="Toyota Land Cruiser V8, actual Depart Rides vehicle"></div>
-        <div class="cinema-layer cinema-interior" data-layer="interior"><img src="assets/stock-leather.jpg" alt="Illustrative luxury cabin photograph"></div>
-        <div class="cinema-layer cinema-cabin" data-layer="cabin"><img src="assets/stock-cabin.jpg" alt="Illustrative luxury cabin amenities photograph"></div>
+        <div class="cinema-layer cinema-interior" data-layer="interior"><img src="assets/stock-cabin.jpg" alt="Illustrative luxury cabin photograph"></div>
+        <div class="cinema-layer cinema-cabin" data-layer="cabin"><img src="assets/stock-leather.jpg" alt="Illustrative luxury cabin amenities photograph"></div>
         <div class="cinema-layer cinema-front" data-layer="front"><img src="assets/v8-front.jpg" alt="Land Cruiser V8 front, actual Depart Rides vehicle"></div>
         <div class="cinema-layer cinema-engine" data-layer="engine"><img src="assets/stock-engine.jpg" alt="Illustrative engine bay photograph"></div>
         <div class="cinema-vignette"></div>
@@ -148,22 +148,20 @@ function home() {
         </div>
       </div>
       <div class="scene scene-perf" data-scene="perf">
-        <div class="wrap perf-layout">
+        <div class="wrap scene-perf-inner">
           <div class="scene-copy">
             <span class="eyebrow">03 · The machine</span>
-            <h2>Presence that<br><span class="accent italic">announces itself.</span></h2>
+            <h2>Presence that <span class="accent italic">announces itself.</span></h2>
             <p>Pull back to the grille — the 2018 Land Cruiser V8, photographed on our own fleet. Counters use facts already listed on this site.</p>
-            <div class="counters">
-              <div class="counter"><strong><span data-count="5">00</span><em>+</em></strong><span>Vehicles in fleet</span></div>
-              <div class="counter"><strong><span data-count="7">00</span></strong><span>Prado seats</span></div>
-              <div class="counter"><strong><span data-count="24">00</span><em>/7</em></strong><span>Inquiry hours</span></div>
-              <div class="counter"><strong><span data-count="2018">0000</span></strong><span>Flagship V8 year</span></div>
-            </div>
           </div>
-          <div>
-            <p class="price-note">Rental rates are confirmed on inquiry. This site does not publish numeric prices — every vehicle is listed as <strong style="color:var(--ink)">On request</strong>, matching the existing fleet copy.</p>
-            <div class="price-grid">${priceCards()}</div>
+          <div class="counters">
+            <div class="counter"><strong><span data-count="5">00</span><em>+</em></strong><span>Vehicles in fleet</span></div>
+            <div class="counter"><strong><span data-count="7">00</span></strong><span>Prado seats</span></div>
+            <div class="counter"><strong><span data-count="24">00</span><em>/7</em></strong><span>Inquiry hours</span></div>
+            <div class="counter"><strong><span data-count="2018">0000</span></strong><span>Flagship V8 year</span></div>
           </div>
+          <p class="price-note">Rental rates are confirmed on inquiry. This site does not publish numeric prices — every vehicle is listed as <strong>On request</strong>, matching the existing fleet copy.</p>
+          <div class="price-grid">${priceCards()}</div>
         </div>
       </div>
     </div>
