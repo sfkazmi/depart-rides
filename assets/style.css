@@ -843,3 +843,17 @@ html.cinema-static .lux-panels, html.cinema-static .price-grid { pointer-events:
   }
   .reveal { opacity: 1; transform: none; filter: none; }
 }
+
+/* Daily rate ranges */
+.rates { display: grid; gap: 8px; margin-top: 6px; }
+.rates--lg { gap: 12px; margin: 10px 0 23px; }
+.rate-row { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; align-items: baseline; }
+.rate-label { font-size: 11px; color: var(--muted); letter-spacing: .12em; text-transform: uppercase; }
+.rate-range { font-weight: 800; white-space: nowrap; }
+.rate-range small { font-weight: 400; color: var(--muted); font-size: 11px; }
+.rate-note { grid-column: 1 / -1; font-size: 11px; color: var(--lime); letter-spacing: .08em; }
+.rate-single { font-weight: 800; }
+.rates--lg .rate-row { border-bottom: 1px solid var(--line); padding-bottom: 12px; }
+.rates--lg .rate-range { font-size: 22px; }
+.vehicle-bottom > div:first-child { flex: 1; }
+.price-card__rate { display: flex; flex-direction: column; gap: 3px; text-transform: none; letter-spacing: .04em; }

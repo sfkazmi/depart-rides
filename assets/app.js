@@ -7,6 +7,10 @@ const CARS = [
     year: 'Model year on request',
     seats: '7 seats',
     rate: 'On request',
+    rates: [
+      { label: 'Local Jhelum', range: 'Rs 15,000 – 18,000', note: 'With fuel' },
+      { label: 'Outside city', range: 'Rs 14,000 – 17,000', note: 'Without fuel' }
+    ],
     image: 'assets/prado-three-quarter.jpg',
     gallery: ['assets/prado-three-quarter.jpg', 'assets/prado-front.jpg', 'assets/prado-angle.jpg'],
     desc: 'A commanding premium SUV for refined city travel, family journeys and comfortable long-distance adventures.'
@@ -19,6 +23,10 @@ const CARS = [
     year: 'Model year on request',
     seats: '5 seats',
     rate: 'On request',
+    rates: [
+      { label: 'Local Jhelum', range: 'Rs 12,000 – 15,000', note: '' },
+      { label: 'Outside city', range: 'Rs 10,000 – 12,000', note: 'Without fuel' }
+    ],
     image: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=1200&q=85',
     desc: 'A contemporary SUV with a spacious cabin, striking presence and comfort for everyday and special trips.'
   },
@@ -53,6 +61,10 @@ const CARS = [
     year: '2018',
     seats: 'Capacity on request',
     rate: 'On request',
+    rates: [
+      { label: 'Local Jhelum', range: 'Rs 20,000 – 25,000', note: 'With fuel' },
+      { label: 'Outside city', range: 'Rs 18,000 – 22,000', note: 'Without fuel' }
+    ],
     image: 'assets/land-cruiser-side.jpg',
     gallery: [
       'assets/land-cruiser-side.jpg',
@@ -75,6 +87,10 @@ const car = (id) => CARS.find((x) => x.id === id) || CARS[0];
 const link = (name, url) => `<a href="${url}" class="${page === name.toLowerCase() ? 'active' : ''}">${name}</a>`;
 const actual = (id) => ['land-cruiser-v8', 'prado'].includes(id);
 
+const rateHtml = (v, cls = 'rates') => v.rates
+  ? `<div class="${cls}">${v.rates.map((r) => `<div class="rate-row"><span class="rate-label">${r.label}</span><span class="rate-range">${r.range}<small> / day</small></span>${r.note ? `<span class="rate-note">${r.note}</span>` : ''}</div>`).join('')}</div>`
+  : `<div class="rate-single">${v.rate}</div>`;
+
 function nav() {
   return `<header class="nav" id="nav"><div class="wrap nav-in"><a class="brand" href="index.html">DEPART<span> / </span>RIDES<small>DRIVE THE EXTRAORDINARY</small></a><nav class="links" id="links">${link('Home', 'index.html')}${link('Fleet', 'fleet.html')}${link('About', 'about.html')}${link('FAQ', 'faq.html')}${link('Contact', 'contact.html')}</nav><a class="btn sm" href="booking.html">Book your ride ↗</a><button class="menu-btn" aria-label="Toggle navigation" aria-expanded="false" id="menu">☰ MENU</button></div></header>`;
 }
@@ -88,7 +104,7 @@ function heading(k, title, sub) {
 }
 
 function card(v, i = 0) {
-  return `<article class="vehicle reveal delay${i % 3}" data-type="${v.type}"><a href="vehicle.html?id=${v.id}" class="vehicle-img"><img loading="lazy" src="${v.image}" alt="${v.name} — ${actual(v.id) ? 'actual Depart Rides vehicle' : 'illustrative vehicle image'}" onerror="this.style.opacity='.05'"><span class="badge">${actual(v.id) ? 'ACTUAL VEHICLE' : v.type.toUpperCase() + ' COLLECTION'}</span></a><div class="vehicle-body"><h3>${v.name}</h3><p>${v.tag}</p><div class="vehicle-meta"><span>${v.type}</span><span>${v.year}</span></div><div class="vehicle-bottom"><div><small>RENTAL RATE</small><div style="font-weight:800">${v.rate}</div></div><a href="vehicle.html?id=${v.id}" class="arrow" aria-label="Explore ${v.name}">↗</a></div></div></article>`;
+  return `<article class="vehicle reveal delay${i % 3}" data-type="${v.type}"><a href="vehicle.html?id=${v.id}" class="vehicle-img"><img loading="lazy" src="${v.image}" alt="${v.name} — ${actual(v.id) ? 'actual Depart Rides vehicle' : 'illustrative vehicle image'}" onerror="this.style.opacity='.05'"><span class="badge">${actual(v.id) ? 'ACTUAL VEHICLE' : v.type.toUpperCase() + ' COLLECTION'}</span></a><div class="vehicle-body"><h3>${v.name}</h3><p>${v.tag}</p><div class="vehicle-meta"><span>${v.type}</span><span>${v.year}</span></div><div class="vehicle-bottom"><div><small>${v.rates ? 'RENTAL RATE · PKR PER DAY' : 'RENTAL RATE'}</small>${rateHtml(v)}</div><a href="vehicle.html?id=${v.id}" class="arrow" aria-label="Explore ${v.name}">↗</a></div></div></article>`;
 }
 
 function cards(list = CARS) {
@@ -100,7 +116,7 @@ function cta() {
 }
 
 function priceCards() {
-  return CARS.map((v) => `<a class="price-card" href="vehicle.html?id=${v.id}"><span class="price-card__name">${v.name}</span><span class="price-card__tag">${v.tag}</span><span class="price-card__rate">${v.rate}</span></a>`).join('');
+  return CARS.map((v) => `<a class="price-card" href="vehicle.html?id=${v.id}"><span class="price-card__name">${v.name}</span><span class="price-card__tag">${v.tag}</span><span class="price-card__rate">${v.rates ? v.rates.map((r) => `<span>${r.label}: ${r.range}${r.note ? ` · ${r.note}` : ''}</span>`).join('') : v.rate}</span></a>`).join('');
 }
 
 function home() {
@@ -161,7 +177,7 @@ function home() {
             <div class="counter"><strong><span data-count="24">00</span><em>/7</em></strong><span>Inquiry hours</span></div>
             <div class="counter"><strong><span data-count="2018">0000</span></strong><span>Flagship V8 year</span></div>
           </div>
-          <p class="price-note">Rental rates are confirmed on inquiry. This site does not publish numeric prices — every vehicle is listed as <strong>On request</strong>, matching the existing fleet copy.</p>
+          <p class="price-note">Daily rates in PKR for local Jhelum and outside-city trips. Final pricing and availability are confirmed on inquiry; other vehicles are <strong>On request</strong>.</p>
           <div class="price-grid">${priceCards()}</div>
         </div>
       </div>
@@ -188,13 +204,13 @@ ${cta()}
 }
 
 function fleet() {
-  return `<main>${heading('OUR FLEET', 'Choose your <span class="accent italic">ride.</span>', 'A curated collection for city drives, family adventures, executive travel and everything in between.')}<section class="section"><div class="wrap"><div class="filters" aria-label="Filter vehicles"><button class="chip selected" data-filter="All">All vehicles</button><button class="chip" data-filter="SUV">SUVs</button><button class="chip" data-filter="Luxury">Luxury</button><button class="chip" data-filter="Sedan">Sedans</button></div><div class="grid grid-3" id="fleet-grid">${cards()}</div><p class="fineprint">Note: Images of the Haval H6 and Jetour T2 are illustrative placeholders until actual photos are provided; Corolla XLi photos are coming soon. Vehicle specifications and rates are confirmed on inquiry. Published rate for every vehicle: On request.</p></div></section>${cta()}</main>`;
+  return `<main>${heading('OUR FLEET', 'Choose your <span class="accent italic">ride.</span>', 'A curated collection for city drives, family adventures, executive travel and everything in between.')}<section class="section"><div class="wrap"><div class="filters" aria-label="Filter vehicles"><button class="chip selected" data-filter="All">All vehicles</button><button class="chip" data-filter="SUV">SUVs</button><button class="chip" data-filter="Luxury">Luxury</button><button class="chip" data-filter="Sedan">Sedans</button></div><div class="grid grid-3" id="fleet-grid">${cards()}</div><p class="fineprint">Note: Images of the Haval H6 and Jetour T2 are illustrative placeholders until actual photos are provided; Corolla XLi photos are coming soon. Rates shown are per day in PKR and are confirmed on inquiry; vehicles without listed rates are On request.</p></div></section>${cta()}</main>`;
 }
 
 function vehicle() {
   const v = car(new URLSearchParams(location.search).get('id'));
   const imgs = v.gallery || [v.image];
-  return `<main>${heading('THE COLLECTION', v.name, v.desc)}<section class="section"><div class="wrap detail-layout"><div class="reveal"><div class="detail-photo"><img id="main-car-image" src="${imgs[0]}" alt="${v.name}"></div><div class="detail-thumbs">${imgs.map((im, i) => `<img src="${im}" alt="${v.name} view ${i + 1}" data-gallery="${im}" tabindex="0">`).join('')}</div>${actual(v.id) ? '' : '<p class="fineprint">Illustrative image only. Request actual vehicle photographs before booking.</p>'}</div><div class="panel reveal"><span class="eyebrow">Vehicle profile</span><h2 style="font-size:48px;margin:20px 0">${v.name}</h2><p>${v.desc}</p><div class="vehicle-meta" style="margin:26px 0"><span>${v.type}</span><span>${v.year}</span><span>${v.seats}</span>${(v.specs || []).map((x) => `<span>${x}</span>`).join('')}</div><div style="border-top:1px solid var(--line);padding-top:25px"><span style="font-size:12px;color:var(--muted);letter-spacing:.14em">DAILY RATE</span><h3 style="font-size:32px;margin:7px 0 23px">${v.rate}</h3><a class="btn" href="booking.html?vehicle=${v.id}" style="width:100%">Request this vehicle ↗</a><p class="fineprint">Availability, pricing, driver options and rental terms are confirmed by our team. No numeric rates are published on this site.</p></div></div></div></section><section class="section tight dark-block"><div class="wrap"><span class="eyebrow">Explore more</span><h2 style="margin:20px 0 40px">More ways to <span class="accent italic">move.</span></h2><div class="grid grid-3">${cards(CARS.filter((x) => x.id !== v.id).slice(0, 3))}</div></div></section></main>`;
+  return `<main>${heading('THE COLLECTION', v.name, v.desc)}<section class="section"><div class="wrap detail-layout"><div class="reveal"><div class="detail-photo"><img id="main-car-image" src="${imgs[0]}" alt="${v.name}"></div><div class="detail-thumbs">${imgs.map((im, i) => `<img src="${im}" alt="${v.name} view ${i + 1}" data-gallery="${im}" tabindex="0">`).join('')}</div>${actual(v.id) ? '' : '<p class="fineprint">Illustrative image only. Request actual vehicle photographs before booking.</p>'}</div><div class="panel reveal"><span class="eyebrow">Vehicle profile</span><h2 style="font-size:48px;margin:20px 0">${v.name}</h2><p>${v.desc}</p><div class="vehicle-meta" style="margin:26px 0"><span>${v.type}</span><span>${v.year}</span><span>${v.seats}</span>${(v.specs || []).map((x) => `<span>${x}</span>`).join('')}</div><div style="border-top:1px solid var(--line);padding-top:25px"><span style="font-size:12px;color:var(--muted);letter-spacing:.14em">${v.rates ? 'DAILY RATE · PKR' : 'DAILY RATE'}</span>${v.rates ? rateHtml(v, 'rates rates--lg') : `<h3 style="font-size:32px;margin:7px 0 23px">${v.rate}</h3>`}<a class="btn" href="booking.html?vehicle=${v.id}" style="width:100%">Request this vehicle ↗</a><p class="fineprint">Availability, pricing, driver options and rental terms are confirmed by our team. Listed rates are indicative daily ranges in PKR.</p></div></div></div></section><section class="section tight dark-block"><div class="wrap"><span class="eyebrow">Explore more</span><h2 style="margin:20px 0 40px">More ways to <span class="accent italic">move.</span></h2><div class="grid grid-3">${cards(CARS.filter((x) => x.id !== v.id).slice(0, 3))}</div></div></section></main>`;
 }
 
 function booking() {
@@ -209,7 +225,7 @@ function about() {
 function faq() {
   const data = [
     ['How do I book a car?', 'Browse the fleet, choose a vehicle and submit a booking inquiry with your dates and pickup location. A booking is only confirmed after direct communication with Depart Rides.'],
-    ['Are prices listed online?', 'Prices are provided on request because rates can vary with dates, location, trip duration and rental requirements. Every vehicle on this site is labelled On request — no numeric rental prices are published.'],
+    ['Are prices listed online?', 'Daily rate ranges in PKR are listed for the Toyota Prado, Haval H6 and Land Cruiser V8, for local Jhelum and outside-city trips. Other vehicles are On request. Final rates depend on dates, trip duration and requirements and are confirmed on inquiry.'],
     ['Can I request a driver?', 'Yes, you can mention your driver requirements in the booking inquiry. Availability and any additional charges must be confirmed directly.'],
     ['What documents do I need?', 'Required identification, license and security arrangements depend on the rental type and will be confirmed before booking.'],
     ['Can I change or cancel a booking?', 'Please contact Depart Rides directly. Cancellation and modification conditions will be explained when your booking is confirmed.'],
