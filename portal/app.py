@@ -61,6 +61,9 @@ def code_hash(code): return hmac.new(SECRET['pepper'].encode(), b'code:' + code.
 def tok_hash(t): return hashlib.sha256(t.encode()).hexdigest()
 def now_pkt(): return datetime.now(PKT)
 def today(): return now_pkt().date()
+def slot_past(d, slot):
+    t = today()
+    return d < t or (d == t and slot == 'morning' and now_pkt().hour >= 12)
 
 # ---- rate limiting (in memory) ----
 LOCK = threading.Lock(); FAILS = {}
@@ -92,7 +95,7 @@ input,select{width:100%;padding:12px 14px;border-radius:12px;border:1px solid va
 .day{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px}.day h3{margin:0 0 8px;font-size:15px;font-weight:600}
 .row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 0;border-top:1px solid var(--line);font-size:13.5px}
 .chips{display:flex;gap:6px}.chip{min-width:62px;text-align:center;border-radius:999px;padding:3px 8px;font-size:12px;font-weight:600}
-.free{background:#1c2b10;color:var(--lime)}.booked{background:#2a1513;color:#ff9b91}.mine{background:#2a2412;color:var(--gold)}
+.free{background:#1c2b10;color:var(--lime);text-decoration:none}a.free:hover{outline:1px solid var(--lime)}.past{background:#1a1d1b;color:#5d655f}.day.isp{opacity:.55}.booked{background:#2a1513;color:#ff9b91}.mine{background:#2a2412;color:var(--gold)}
 table{width:100%;border-collapse:collapse;font-size:13.5px}td,th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
 .tablewrap{overflow-x:auto}.nav{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}.tabs{display:flex;gap:8px;margin:10px 0}
 .legend{display:flex;gap:8px;flex-wrap:wrap;font-size:12px;margin:8px 0}
@@ -114,15 +117,20 @@ def calendar(start, viewer_agent=None, link_base=None):
                          (start.isoformat(), end.isoformat())).fetchall()
     taken = {(r['car'], r['date'], r['slot']): r['agent_id'] for r in rows}
     out = ['<div class="legend"><span class="chip free">Available</span><span class="chip booked">Booked</span>' +
-           ('<span class="chip mine">Your booking</span>' if viewer_agent else '') + '</div><div class="cal">']
+           ('<span class="chip mine">Your booking</span>' if viewer_agent else '') + '<span class="chip past">Past</span></div><div class="cal">']
     for i in range(DAYS):
         d = start + timedelta(days=i); ds = d.isoformat()
-        out.append(f'<div class="day"><h3>{fmt_day(d)}</h3>')
+        dp = d < today()
+        out.append(f'<div class="day{" isp" if dp else ""}"><h3>{fmt_day(d)}{" · Past" if dp else ""}</h3>')
         for cid, cname in CARS:
             chips = []
             for sid, sname in SLOTS:
                 a = taken.get((cid, ds, sid))
                 cls, txt = ('free', sname) if a is None else (('mine', sname) if viewer_agent and a == viewer_agent else ('booked', sname))
+                if cls == 'free' and slot_past(d, sid):
+                    chips.append(f'<span class="chip past" title="Past">{sname}</span>'); continue
+                if cls == 'free' and viewer_agent:
+                    chips.append(f'<a class="chip free" href="{BASE}/?{urlencode({"car": cid, "date": ds, "slot": sid})}#book" title="Book {e(cname)} {e(sname)}">{txt}</a>'); continue
                 chips.append(f'<span class="chip {cls}" title="{e(cname)} {e(sname)}: {"available" if a is None else "booked"}">{txt}</span>')
             out.append(f'<div class="row"><span>{e(cname)}</span><span class="chips">{"".join(chips)}</span></div>')
         out.append('</div>')
@@ -243,15 +251,19 @@ class H(BaseHTTPRequestHandler):
         start = parse_start(q); t = today()
         with db() as c:
             mine = c.execute('SELECT * FROM bookings WHERE agent_id=? AND cancelled_at IS NULL AND date>=? ORDER BY date,slot', (a['id'], t.isoformat())).fetchall()
-        car_opts = ''.join(f'<option value="{k}">{e(v)}</option>' for k, v in CARS)
+        pc, pd, ps = q.get('car', [''])[0], q.get('date', [''])[0], q.get('slot', [''])[0]
+        car_opts = ''.join(f'<option value="{k}"{" selected" if k == pc else ""}>{e(v)}</option>' for k, v in CARS)
+        dmin = '' if self.as_admin else f' min="{t}"'
+        try: dval = datetime.strptime(pd, '%Y-%m-%d').date().isoformat()
+        except ValueError: dval = t.isoformat()
         rows = ''.join(f'''<tr><td>{fmt_day(datetime.strptime(b["date"],"%Y-%m-%d"))}</td><td>{e(CARN.get(b["car"],b["car"]))}</td><td>{dict(SLOTS)[b["slot"]]}</td>
 <td>{dict(TRIPS)[b["trip"]]}</td><td>{rs(b["amount"])}</td><td><form method="post" action="{BASE}/cancel" onsubmit="return confirm('Cancel this booking?')">
 <input type="hidden" name="id" value="{b["id"]}"><button class="btn danger sm">Cancel</button></form></td></tr>''' for b in mine)
         body = f'''<span class="eyebrow">Agent portal</span><h1>Hi, <span class="accent">{e(a["name"])}</span></h1>{flash}
-<form class="panel" method="post" action="{BASE}/book"><h2>New booking</h2><div class="grid2">
+<form class="panel" id="book" method="post" action="{BASE}/book"><h2>New booking</h2><div class="grid2">
 <div><label>Car</label><select name="car" required>{car_opts}</select></div>
-<div><label>Date</label><input type="date" name="date" required min="{t}" max="{t + timedelta(days=365)}" value="{t}"></div>
-<div><label>Slot</label><select name="slot">{''.join(f'<option value="{k}">{v}</option>' for k,v in SLOTS)}</select></div>
+<div><label>Date</label><input type="date" name="date" required{dmin} max="{t + timedelta(days=365)}" value="{dval}"></div>
+<div><label>Slot</label><select name="slot">{''.join(f'<option value="{k}"{" selected" if k == ps else ""}>{v}</option>' for k,v in SLOTS)}</select>{'' if self.as_admin else '<p class="muted" style="font-size:12px;margin:4px 0 0">Today&#39;s Morning slot closes at 12:00 PM.</p>'}</div>
 <div><label>Trip</label><select name="trip">{''.join(f'<option value="{k}">{v}</option>' for k,v in TRIPS)}</select></div>
 <div><label>Booking amount (Rs)</label><input name="amount" inputmode="numeric" pattern="[0-9]{{1,7}}" required placeholder="e.g. 25000"></div>
 </div><p><button class="btn">Book this slot</button></p></form>
@@ -338,7 +350,13 @@ class H(BaseHTTPRequestHandler):
         try: d = datetime.strptime(f.get('date', ''), '%Y-%m-%d').date()
         except ValueError: return err('Pick a valid date.')
         if car not in CARN or slot not in dict(SLOTS) or trip not in dict(TRIPS): return err('Invalid choice.')
-        if d < today() or d > today() + timedelta(days=365): return err('Date must be from today up to one year ahead.')
+        if d > today() + timedelta(days=365): return err('Date must be within one year ahead.')
+        if self.as_admin:
+            if d < today() - timedelta(days=730): return err('Date is too far in the past.')
+        elif d < today():
+            return err(f'{fmt_day(d)} has already passed. Please pick today or a future date.')
+        elif slot_past(d, slot):
+            return err("Today's Morning slot closed at 12:00 PM. Please book the Evening slot or another day.")
         if not amt.isdigit() or not (0 < int(amt) <= 5_000_000): return err('Enter the booking amount in rupees (numbers only).')
         try:
             with db() as c:
