@@ -326,7 +326,8 @@ p { color: var(--muted); }
 .detail-layout { display: grid; grid-template-columns: 1.25fr .75fr; gap: 38px; }
 .detail-photo { border-radius: 25px; overflow: hidden; background: #19231c; min-height: 400px; }
 .detail-photo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 70%; }
-.detail-thumbs { display: flex; gap: 10px; margin-top: 12px; }
+.detail-thumbs { display: flex; gap: 10px; margin-top: 12px; overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch; }
+.detail-thumbs img { flex: 0 0 auto; }
 .detail-thumbs img {
   width: 120px; height: 82px;
   object-fit: cover;
@@ -839,12 +840,12 @@ html.cinema-static .scene {
 html.cinema-static .scene-hero {
   background:
     linear-gradient(90deg, #050706f2 8%, #05070688 55%, #05070633),
-    url('land-cruiser-side.jpg') center 62%/cover;
+    url('v8-door-1.webp') 60% 62%/cover;
 }
 html.cinema-static .scene-cabin {
   background:
     linear-gradient(90deg, #050706f0 0%, #05070688 50%, #05070655),
-    url('stock-cabin.jpg') center/cover;
+    url('v8-dashboard.webp') center/cover;
 }
 html.cinema-static .scene-perf {
   background:
@@ -894,3 +895,4 @@ html.cinema-static .lux-panels, html.cinema-static .price-grid { pointer-events:
 .brand-logo { display: inline-flex; align-items: center; }
 .brand-logo img { display: block; height: 40px; width: auto; max-width: 62vw; }
 .footer .brand-logo img { height: 48px; }
+.detail-layout > * { min-width: 0; }

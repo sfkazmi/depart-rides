@@ -8,7 +8,10 @@
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const hasGsap = typeof window.gsap !== 'undefined' && typeof window.ScrollTrigger !== 'undefined';
 
-  if (reduce || !hasGsap) {
+  // Small screens get the static, fully scrollable layout (no pinned door sequence).
+  const small = matchMedia('(max-width: 900px)').matches;
+
+  if (reduce || !hasGsap || small) {
     document.documentElement.classList.add('cinema-static');
     animateCounters(true);
     return;
@@ -109,7 +112,6 @@
   }
 
   mm.add('(min-width: 901px)', () => buildTimeline(2.55, '58% 42%'));
-  mm.add('(max-width: 900px)', () => buildTimeline(1.85, '50% 48%'));
 
   window.addEventListener('load', () => window.ScrollTrigger.refresh());
 })();
