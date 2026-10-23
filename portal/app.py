@@ -392,7 +392,7 @@ if __name__ == '__main__':
         print(set_admin(sys.argv[2])); sys.exit()
     if len(sys.argv) > 1 and sys.argv[1] == 'set-admin-stdin':  # password read from stdin, never printed
         pw = sys.stdin.readline().rstrip('\n')
-        if len(pw) < 8: sys.exit('password too short')
+        if len(pw) < 4: sys.exit('password too short')
         set_admin(sys.argv[2], pw); print('ok'); sys.exit()
     if len(sys.argv) > 1 and sys.argv[1] == 'public-slug':
         print(SECRET['public_slug']); sys.exit()
