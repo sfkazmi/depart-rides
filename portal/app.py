@@ -2,7 +2,7 @@
 """Depart Rides agent portal. Stdlib only (http.server + sqlite3).
 Runs on 127.0.0.1:3891 behind Apache (/agents/*). No secrets in this file:
 the pepper and public-page slug live in $STATE/secret.json (created on first run)."""
-import hashlib, hmac, html, json, os, secrets, sqlite3, string, sys, time, threading
+import hashlib, hmac, html, re, json, os, secrets, sqlite3, string, sys, time, threading
 from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse, urlencode
@@ -142,11 +142,20 @@ class H(BaseHTTPRequestHandler):
     def ip(self):
         xf = self.headers.get('X-Forwarded-For', '')
         return xf.split(',')[-1].strip() if xf else self.client_address[0]
+    def csrf_cookie(self):
+        for part in self.headers.get('Cookie', '').split(';'):
+            k, _, v = part.strip().partition('=')
+            if k == 'dr_c' and len(v) >= 20: return v
     def send(self, body, code=200, headers=()):
+        tok = self.csrf_cookie(); headers = list(headers)
+        if not tok:
+            tok = secrets.token_urlsafe(24)
+            headers.append(('Set-Cookie', f'dr_c={tok}; Path={BASE}; Max-Age=2592000; HttpOnly; Secure; SameSite=Strict'))
+        body = re.sub(r'(<form [^>]*method="post"[^>]*>)', lambda m: m.group(1) + f'<input type="hidden" name="csrf" value="{tok}">', body)
         b = body.encode(); self.send_response(code)
         self.send_header('Content-Type', 'text/html; charset=utf-8'); self.send_header('Content-Length', str(len(b)))
         self.send_header('Cache-Control', 'no-store'); self.send_header('X-Robots-Tag', 'noindex, nofollow')
-        self.send_header('X-Frame-Options', 'DENY'); self.send_header('Referrer-Policy', 'no-referrer')
+        self.send_header('X-Frame-Options', 'DENY'); self.send_header('Referrer-Policy', 'same-origin')
         self.send_header('X-Content-Type-Options', 'nosniff')
         for k, v in headers: self.send_header(k, v)
         self.end_headers(); self.wfile.write(b)
@@ -182,9 +191,15 @@ class H(BaseHTTPRequestHandler):
     def form(self):
         n = min(int(self.headers.get('Content-Length') or 0), 10000)
         return {k: v[0].strip() for k, v in parse_qs(self.rfile.read(n).decode('utf-8', 'replace')).items()}
-    def same_origin(self):
-        o = self.headers.get('Origin')
-        return o in (None, 'null', 'https://departrides.com', 'https://www.departrides.com') and o != 'null'
+    def same_origin(self, f):
+        ok = ('https://departrides.com', 'https://www.departrides.com')
+        o = (self.headers.get('Origin') or '').rstrip('/')
+        if o in ok: return True
+        r = self.headers.get('Referer') or ''
+        if o in ('', 'null') and any(r == x or r.startswith(x + '/') for x in ok): return True
+        if o not in ('', 'null'): return False  # a real foreign origin
+        c = self.csrf_cookie()  # no usable Origin/Referer: double-submit token + SameSite=Strict
+        return bool(c) and hmac.compare_digest(c, f.get('csrf', ''))
 
     # ---------- GET ----------
     def do_GET(self):
@@ -269,8 +284,10 @@ class H(BaseHTTPRequestHandler):
     # ---------- POST ----------
     def do_POST(self):
         p = urlparse(self.path).path.rstrip('/')
-        if not self.same_origin(): return self.send('Bad origin', 403)
         f = self.form(); ip = self.ip()
+        if not self.same_origin(f):
+            back = BASE + ('/admin' if p.startswith(BASE + '/admin') else '/')
+            return self.redirect(back + '?' + urlencode({'err': 'Your session form expired. Please try again.'}))
         routes = {BASE + '/login': self.login, BASE + '/logout': lambda f, ip: self.redirect(BASE + '/', [self.end_session()]),
                   BASE + '/book': self.book, BASE + '/cancel': self.cancel, BASE + '/admin/login': self.admin_login,
                   BASE + '/admin/logout': lambda f, ip: self.redirect(BASE + '/admin', [self.end_session()]),
@@ -363,8 +380,8 @@ class H(BaseHTTPRequestHandler):
         with db() as c: c.execute('UPDATE bookings SET cancelled_at=? WHERE id=? AND cancelled_at IS NULL', (now_pkt().isoformat(timespec='seconds'), f.get('id')))
         self.redirect(BASE + '/admin?' + urlencode({'m': 'Booking cancelled.'}))
 
-def set_admin(username):
-    pw = secrets.token_urlsafe(12)
+def set_admin(username, pw=None):
+    pw = pw or secrets.token_urlsafe(12)
     with db() as c:
         c.execute('INSERT INTO admins(username,pw_hash) VALUES(?,?) ON CONFLICT(username) DO UPDATE SET pw_hash=excluded.pw_hash', (username, pw_hash(pw)))
     return pw
@@ -373,6 +390,10 @@ if __name__ == '__main__':
     os.makedirs(STATE, exist_ok=True); SECRET = load_secret(); init_db()
     if len(sys.argv) > 1 and sys.argv[1] == 'set-admin':
         print(set_admin(sys.argv[2])); sys.exit()
+    if len(sys.argv) > 1 and sys.argv[1] == 'set-admin-stdin':  # password read from stdin, never printed
+        pw = sys.stdin.readline().rstrip('\n')
+        if len(pw) < 8: sys.exit('password too short')
+        set_admin(sys.argv[2], pw); print('ok'); sys.exit()
     if len(sys.argv) > 1 and sys.argv[1] == 'public-slug':
         print(SECRET['public_slug']); sys.exit()
     ThreadingHTTPServer(('127.0.0.1', PORT), H).serve_forever()
