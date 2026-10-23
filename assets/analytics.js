@@ -1,7 +1,7 @@
 /* Google Analytics 4 for Depart Rides.
  * Put your GA4 Measurement ID (e.g. 'G-XXXXXXXXXX') below. While it is empty,
  * nothing is loaded and no data is sent. */
-const GA_ID = '';
+const GA_ID = 'G-4WS1P7PFW4';
 
 (function () {
   if (!GA_ID) return;
