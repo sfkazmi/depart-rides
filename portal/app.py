@@ -44,6 +44,9 @@ def init_db():
           created_at TEXT NOT NULL, cancelled_at TEXT);
         CREATE UNIQUE INDEX IF NOT EXISTS one_booking ON bookings(car, date, slot) WHERE cancelled_at IS NULL;
         ''')
+        for t, col in (('sessions', 'as_agent INTEGER'), ('bookings', 'by_admin INTEGER')):
+            if col.split()[0] not in [r[1] for r in c.execute(f'PRAGMA table_info({t})')]:
+                c.execute(f'ALTER TABLE {t} ADD COLUMN {col}')
 
 def pw_hash(pw, salt=None):
     salt = salt or secrets.token_bytes(16)
@@ -168,10 +171,17 @@ class H(BaseHTTPRequestHandler):
             k, _, v = part.strip().partition('=')
             if k == 'dr_s': return v
     def session(self, role):
+        self.as_admin = None
         t = self.cookie()
         if not t: return None
         with db() as c:
+            self.as_admin = None
             r = c.execute('SELECT ref_id FROM sessions WHERE token_hash=? AND role=? AND expires>?', (tok_hash(t), role, time.time())).fetchone()
+            if not r and role == 'agent':  # admin viewing as an agent
+                r2 = c.execute("SELECT ref_id, as_agent FROM sessions WHERE token_hash=? AND role='admin' AND expires>? AND as_agent IS NOT NULL", (tok_hash(t), time.time())).fetchone()
+                if r2:
+                    self.as_admin = r2['ref_id']
+                    return c.execute('SELECT * FROM agents WHERE id=? AND active=1', (r2['as_agent'],)).fetchone()
             if not r: return None
             if role == 'agent':
                 a = c.execute('SELECT * FROM agents WHERE id=? AND active=1', (r['ref_id'],)).fetchone()
@@ -181,7 +191,7 @@ class H(BaseHTTPRequestHandler):
         t = secrets.token_urlsafe(32)
         with db() as c:
             c.execute('DELETE FROM sessions WHERE expires<?', (time.time(),))
-            c.execute('INSERT INTO sessions VALUES(?,?,?,?)', (tok_hash(t), role, ref, time.time() + ttl))
+            c.execute('INSERT INTO sessions(token_hash,role,ref_id,expires) VALUES(?,?,?,?)', (tok_hash(t), role, ref, time.time() + ttl))
         return ('Set-Cookie', f'dr_s={t}; Path={BASE}; Max-Age={ttl}; HttpOnly; Secure; SameSite=Strict')
     def end_session(self):
         t = self.cookie()
@@ -248,6 +258,9 @@ class H(BaseHTTPRequestHandler):
 <div class="panel"><h2>Your upcoming bookings</h2>{('<div class="tablewrap"><table><tr><th>Date</th><th>Car</th><th>Slot</th><th>Trip</th><th>Amount</th><th></th></tr>' + rows + '</table></div>') if mine else '<p class="muted">No upcoming bookings.</p>'}</div>
 <h2>Availability</h2>{calendar(start, a["id"], BASE)}'''
         right = f'<form method="post" action="{BASE}/logout"><button class="btn ghost sm">Log out</button></form>'
+        if self.as_admin:
+            right = f'<form method="post" action="{BASE}/admin/stop-as"><button class="btn sm">Back to admin</button></form>'
+            body = f'<div class="msg" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><span>Viewing as <b>{e(a["name"])}</b> (admin). Bookings you make are recorded as made by admin on their behalf.</span><form method="post" action="{BASE}/admin/stop-as"><button class="btn sm">Back to admin</button></form></div>' + body
         self.send(page('Agent portal', body, right))
 
     def admin_home(self, q, flash):
@@ -266,9 +279,10 @@ class H(BaseHTTPRequestHandler):
             bks = c.execute(sql + ' ORDER BY b.date, b.slot, b.car', args).fetchall()
         total = sum(b['amount'] for b in bks)
         arows = ''.join(f'''<tr><td>{e(x["name"])}</td><td>{e(x["username"])}</td><td>{x["n"]}</td><td><form method="post" action="{BASE}/admin/agent-del" onsubmit="return confirm('Remove agent {e(x["name"])} and all their bookings?')">
-<input type="hidden" name="id" value="{x["id"]}"><button class="btn danger sm">Remove</button></form></td></tr>''' for x in agents)
+<input type="hidden" name="id" value="{x["id"]}"><button class="btn danger sm">Remove</button></form>
+<form method="post" action="{BASE}/admin/login-as" style="margin-top:6px"><input type="hidden" name="id" value="{x["id"]}"><button class="btn sm">Login as agent</button></form></td></tr>''' for x in agents)
         brows = ''.join(f'''<tr><td>{b["date"]}</td><td>{e(CARN.get(b["car"],b["car"]))}</td><td>{dict(SLOTS)[b["slot"]]}</td><td>{dict(TRIPS)[b["trip"]]}</td>
-<td>{e(b["agent"])}</td><td>{rs(b["amount"])}</td><td><form method="post" action="{BASE}/admin/booking-cancel" onsubmit="return confirm('Cancel booking?')"><input type="hidden" name="id" value="{b["id"]}"><button class="btn danger sm">Cancel</button></form></td></tr>''' for b in bks)
+<td>{e(b["agent"])}{' <span class="muted">(by admin)</span>' if b["by_admin"] else ''}</td><td>{rs(b["amount"])}</td><td><form method="post" action="{BASE}/admin/booking-cancel" onsubmit="return confirm('Cancel booking?')"><input type="hidden" name="id" value="{b["id"]}"><button class="btn danger sm">Cancel</button></form></td></tr>''' for b in bks)
         body = f'''<span class="eyebrow">Admin</span><h1>Agent <span class="accent">admin</span></h1>{flash}
 <form class="panel" method="post" action="{BASE}/admin/agent-add"><h2>Add agent</h2><div class="grid2">
 <div><label>Name</label><input name="name" required maxlength="60"></div><div><label>Username</label><input name="username" required maxlength="40" pattern="[A-Za-z0-9._-]{{3,40}}" autocapitalize="none"></div>
@@ -288,11 +302,12 @@ class H(BaseHTTPRequestHandler):
         if not self.same_origin(f):
             back = BASE + ('/admin' if p.startswith(BASE + '/admin') else '/')
             return self.redirect(back + '?' + urlencode({'err': 'Your session form expired. Please try again.'}))
-        routes = {BASE + '/login': self.login, BASE + '/logout': lambda f, ip: self.redirect(BASE + '/', [self.end_session()]),
+        routes = {BASE + '/login': self.login, BASE + '/logout': lambda f, ip: self.stop_as(f, ip) if (self.session('agent') and self.as_admin) else self.redirect(BASE + '/', [self.end_session()]),
                   BASE + '/book': self.book, BASE + '/cancel': self.cancel, BASE + '/admin/login': self.admin_login,
                   BASE + '/admin/logout': lambda f, ip: self.redirect(BASE + '/admin', [self.end_session()]),
                   BASE + '/admin/agent-add': self.agent_add, BASE + '/admin/agent-del': self.agent_del,
-                  BASE + '/admin/booking-cancel': self.admin_cancel}
+                  BASE + '/admin/booking-cancel': self.admin_cancel, BASE + '/admin/login-as': self.login_as,
+                  BASE + '/admin/stop-as': self.stop_as}
         if p not in routes: return self.send('Not found', 404)
         routes[p](f, ip)
 
@@ -327,8 +342,8 @@ class H(BaseHTTPRequestHandler):
         if not amt.isdigit() or not (0 < int(amt) <= 5_000_000): return err('Enter the booking amount in rupees (numbers only).')
         try:
             with db() as c:
-                c.execute('INSERT INTO bookings(agent_id,car,date,slot,trip,amount,created_at) VALUES(?,?,?,?,?,?,?)',
-                          (a['id'], car, d.isoformat(), slot, trip, int(amt), now_pkt().isoformat(timespec='seconds')))
+                c.execute('INSERT INTO bookings(agent_id,car,date,slot,trip,amount,created_at,by_admin) VALUES(?,?,?,?,?,?,?,?)',
+                          (a['id'], car, d.isoformat(), slot, trip, int(amt), now_pkt().isoformat(timespec='seconds'), self.as_admin))
         except sqlite3.IntegrityError:
             return err(f'{CARN[car]} is already booked on {fmt_day(d)} ({dict(SLOTS)[slot]}). Pick another car, date or slot.')
         self.redirect(BASE + '/?' + urlencode({'m': f'Booked: {CARN[car]}, {fmt_day(d)}, {dict(SLOTS)[slot]}, {dict(TRIPS)[trip]}, {rs(int(amt))}.', 'from': d.isoformat() if d >= today() + timedelta(days=DAYS) else ''}))
@@ -368,10 +383,24 @@ class H(BaseHTTPRequestHandler):
 <p>Or 6-digit code: <code>{code}</code></p></div><p><a class="btn" href="{BASE}/admin">Back to admin</a></p>'''
         self.send(page('Agent added', body))
 
+    def login_as(self, f, ip):
+        if not self.session('admin'): return self.redirect(BASE + '/admin')
+        with db() as c:
+            a = c.execute('SELECT id FROM agents WHERE id=? AND active=1', (f.get('id'),)).fetchone()
+            if not a: return self.redirect(BASE + '/admin?' + urlencode({'err': 'Agent not found.'}))
+            c.execute("UPDATE sessions SET as_agent=? WHERE token_hash=? AND role='admin'", (a['id'], tok_hash(self.cookie())))
+        self.redirect(BASE + '/')
+
+    def stop_as(self, f, ip):
+        if self.session('admin'):
+            with db() as c: c.execute("UPDATE sessions SET as_agent=NULL WHERE token_hash=? AND role='admin'", (tok_hash(self.cookie()),))
+        self.redirect(BASE + '/admin')
+
     def agent_del(self, f, ip):
         if not self.session('admin'): return self.redirect(BASE + '/admin')
         with db() as c:
             c.execute("DELETE FROM sessions WHERE role='agent' AND ref_id=?", (f.get('id'),))
+            c.execute("UPDATE sessions SET as_agent=NULL WHERE as_agent=?", (f.get('id'),))
             n = c.execute('DELETE FROM agents WHERE id=?', (f.get('id'),)).rowcount
         self.redirect(BASE + '/admin?' + urlencode({'m': 'Agent removed with their bookings.'} if n else {'err': 'Agent not found.'}))
 
