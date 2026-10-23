@@ -18,6 +18,50 @@ CARN = dict(CARS)
 SLOTS = [('morning', 'Morning'), ('evening', 'Evening')]
 TRIPS = [('local', 'Local'), ('out', 'Out of city')]
 DAYS = 14
+DEFAULT_PAYOUTS = [('prado', 1000, 2000), ('land-cruiser-v8', 2000, 2000), ('haval-h6', 1000, 1500),
+                   ('jetour-t2', 2000, 2500), ('corolla-xli', 0, 0)]
+
+def payouts(c): return {r['car']: (r['commission'], r['driving']) for r in c.execute('SELECT * FROM payouts')}
+
+def period(q):
+    t = today(); p = q.get('period', ['month'])[0]
+    first = t.replace(day=1)
+    if p == 'last':
+        hi = first - timedelta(days=1); return p, hi.replace(day=1), hi, 'Last month'
+    if p == 'all': return p, None, None, 'All time'
+    if p == 'custom':
+        try:
+            lo = datetime.strptime(q.get('from_d', [''])[0], '%Y-%m-%d').date(); hi = datetime.strptime(q.get('to_d', [''])[0], '%Y-%m-%d').date()
+            if lo <= hi: return p, lo, hi, f'{fmt_day(lo)} – {fmt_day(hi)}'
+        except ValueError: pass
+    return 'month', first, (first + timedelta(days=32)).replace(day=1) - timedelta(days=1), 'This month'
+
+def period_sql(lo, hi):
+    return ((' AND b.date>=? AND b.date<=?', (lo.isoformat(), hi.isoformat())) if lo else ('', ()))
+
+def totals(bks, po):
+    t = {'n': 0, 'rev': 0, 'com': 0, 'drv': 0, 'fuel': 0}
+    for b in bks:
+        cm, dv = po.get(b['car'], (0, 0))
+        t['n'] += 1; t['rev'] += b['amount']; t['com'] += cm; t['drv'] += dv if b['driver'] else 0; t['fuel'] += b['fuel']
+    t['net'] = t['rev'] - t['com'] - t['drv'] - t['fuel']; return t
+
+def stat_cards(t, net=False):
+    items = [('Bookings', str(t['n'])), ('Revenue', rs(t['rev'])), ('Commission', rs(t['com'])), ('Driving', rs(t['drv'])), ('Fuel cost', rs(t['fuel']))]
+    if net: items.append(('Net', rs(t['net'])))
+    return '<div class="stats">' + ''.join(f'<div class="stat"><span>{k}</span><b>{v}</b></div>' for k, v in items) + '</div>'
+
+def period_bar(pk, q, extra=''):
+    tabs = ''.join(f'<a class="btn sm {"" if pk == k else "ghost"}" href="?period={k}{extra}">{v}</a>' for k, v in (('month', 'This month'), ('last', 'Last month'), ('all', 'All time')))
+    return (f'<div class="tabs">{tabs}</div><form method="get" class="tabs" style="align-items:end"><input type="hidden" name="period" value="custom">'
+            f'<div><label>From</label><input type="date" name="from_d" required value="{e(q.get("from_d", [""])[0])}"></div>'
+            f'<div><label>To</label><input type="date" name="to_d" required value="{e(q.get("to_d", [""])[0])}"></div><button class="btn sm {"" if pk == "custom" else "ghost"}">Custom range</button></form>')
+
+def edit_cell(b, action):
+    return (f'<form method="post" action="{action}" class="tabs" style="margin:0"><input type="hidden" name="id" value="{b["id"]}">'
+            f'<input name="fuel" inputmode="numeric" pattern="[0-9]{{0,7}}" value="{b["fuel"]}" style="width:90px" aria-label="Fuel cost (Rs)">'
+            f'<select name="driver" aria-label="With driver"><option value="1"{" selected" if b["driver"] else ""}>Driver</option><option value="0"{"" if b["driver"] else " selected"}>No driver</option></select>'
+            f'<button class="btn sm ghost">Save</button></form>')
 
 def load_secret():
     p = os.path.join(STATE, 'secret.json')
@@ -44,7 +88,10 @@ def init_db():
           created_at TEXT NOT NULL, cancelled_at TEXT);
         CREATE UNIQUE INDEX IF NOT EXISTS one_booking ON bookings(car, date, slot) WHERE cancelled_at IS NULL;
         ''')
-        for t, col in (('sessions', 'as_agent INTEGER'), ('bookings', 'by_admin INTEGER')):
+        c.execute('CREATE TABLE IF NOT EXISTS payouts(car TEXT PRIMARY KEY, commission INTEGER NOT NULL DEFAULT 0, driving INTEGER NOT NULL DEFAULT 0)')
+        c.executemany('INSERT OR IGNORE INTO payouts(car,commission,driving) VALUES(?,?,?)', DEFAULT_PAYOUTS)
+        for t, col in (('sessions', 'as_agent INTEGER'), ('bookings', 'by_admin INTEGER'),
+                       ('bookings', 'fuel INTEGER NOT NULL DEFAULT 0'), ('bookings', 'driver INTEGER NOT NULL DEFAULT 1')):
             if col.split()[0] not in [r[1] for r in c.execute(f'PRAGMA table_info({t})')]:
                 c.execute(f'ALTER TABLE {t} ADD COLUMN {col}')
 
@@ -95,7 +142,7 @@ input,select{width:100%;padding:12px 14px;border-radius:12px;border:1px solid va
 .day{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px}.day h3{margin:0 0 8px;font-size:15px;font-weight:600}
 .row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 0;border-top:1px solid var(--line);font-size:13.5px}
 .chips{display:flex;gap:6px}.chip{min-width:62px;text-align:center;border-radius:999px;padding:3px 8px;font-size:12px;font-weight:600}
-.free{background:#1c2b10;color:var(--lime);text-decoration:none}a.free:hover{outline:1px solid var(--lime)}.past{background:#1a1d1b;color:#5d655f}.day.isp{opacity:.55}.booked{background:#2a1513;color:#ff9b91}.mine{background:#2a2412;color:var(--gold)}
+.free{background:#1c2b10;color:var(--lime);text-decoration:none}a.free:hover{outline:1px solid var(--lime)}.past{background:#1a1d1b;color:#5d655f}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:10px 0}.stat{background:#151815;border:1px solid #263026;border-radius:10px;padding:10px}.stat span{display:block;font-size:12px;color:#8a948c}.stat b{font-size:18px}.day.isp{opacity:.55}.booked{background:#2a1513;color:#ff9b91}.mine{background:#2a2412;color:var(--gold)}
 table{width:100%;border-collapse:collapse;font-size:13.5px}td,th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
 .tablewrap{overflow-x:auto}.nav{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}.tabs{display:flex;gap:8px;margin:10px 0}
 .legend{display:flex;gap:8px;flex-wrap:wrap;font-size:12px;margin:8px 0}
@@ -117,7 +164,7 @@ def calendar(start, viewer_agent=None, link_base=None):
                          (start.isoformat(), end.isoformat())).fetchall()
     taken = {(r['car'], r['date'], r['slot']): r['agent_id'] for r in rows}
     out = ['<div class="legend"><span class="chip free">Available</span><span class="chip booked">Booked</span>' +
-           ('<span class="chip mine">Your booking</span>' if viewer_agent else '') + '<span class="chip past">Past</span></div><div class="cal">']
+           ('<span class="chip mine">Your booking</span>' if viewer_agent else '') + ('' if viewer_agent else '<span class="chip past">Past</span>') + '</div><div class="cal">']
     for i in range(DAYS):
         d = start + timedelta(days=i); ds = d.isoformat()
         dp = d < today()
@@ -127,7 +174,7 @@ def calendar(start, viewer_agent=None, link_base=None):
             for sid, sname in SLOTS:
                 a = taken.get((cid, ds, sid))
                 cls, txt = ('free', sname) if a is None else (('mine', sname) if viewer_agent and a == viewer_agent else ('booked', sname))
-                if cls == 'free' and slot_past(d, sid):
+                if cls == 'free' and slot_past(d, sid) and not viewer_agent:
                     chips.append(f'<span class="chip past" title="Past">{sname}</span>'); continue
                 if cls == 'free' and viewer_agent:
                     chips.append(f'<a class="chip free" href="{BASE}/?{urlencode({"car": cid, "date": ds, "slot": sid})}#book" title="Book {e(cname)} {e(sname)}">{txt}</a>'); continue
@@ -250,24 +297,28 @@ class H(BaseHTTPRequestHandler):
             return self.send(page('Agent login', body))
         start = parse_start(q); t = today()
         with db() as c:
-            mine = c.execute('SELECT * FROM bookings WHERE agent_id=? AND cancelled_at IS NULL AND date>=? ORDER BY date,slot', (a['id'], t.isoformat())).fetchall()
+            pk, lo, hi, plabel = period(q); ps_sql, ps_args = period_sql(lo, hi)
+            mine = c.execute('SELECT b.* FROM bookings b WHERE b.agent_id=? AND b.cancelled_at IS NULL' + ps_sql + ' ORDER BY b.date DESC,b.slot', (a['id'],) + ps_args).fetchall()
+            tot = totals(mine, payouts(c))
         pc, pd, ps = q.get('car', [''])[0], q.get('date', [''])[0], q.get('slot', [''])[0]
         car_opts = ''.join(f'<option value="{k}"{" selected" if k == pc else ""}>{e(v)}</option>' for k, v in CARS)
-        dmin = '' if self.as_admin else f' min="{t}"'
         try: dval = datetime.strptime(pd, '%Y-%m-%d').date().isoformat()
         except ValueError: dval = t.isoformat()
         rows = ''.join(f'''<tr><td>{fmt_day(datetime.strptime(b["date"],"%Y-%m-%d"))}</td><td>{e(CARN.get(b["car"],b["car"]))}</td><td>{dict(SLOTS)[b["slot"]]}</td>
-<td>{dict(TRIPS)[b["trip"]]}</td><td>{rs(b["amount"])}</td><td><form method="post" action="{BASE}/cancel" onsubmit="return confirm('Cancel this booking?')">
+<td>{dict(TRIPS)[b["trip"]]}</td><td>{rs(b["amount"])}</td><td>{edit_cell(b, BASE + "/edit")}</td><td><form method="post" action="{BASE}/cancel" onsubmit="return confirm('Cancel this booking?')">
 <input type="hidden" name="id" value="{b["id"]}"><button class="btn danger sm">Cancel</button></form></td></tr>''' for b in mine)
         body = f'''<span class="eyebrow">Agent portal</span><h1>Hi, <span class="accent">{e(a["name"])}</span></h1>{flash}
 <form class="panel" id="book" method="post" action="{BASE}/book"><h2>New booking</h2><div class="grid2">
 <div><label>Car</label><select name="car" required>{car_opts}</select></div>
-<div><label>Date</label><input type="date" name="date" required{dmin} max="{t + timedelta(days=365)}" value="{dval}"></div>
-<div><label>Slot</label><select name="slot">{''.join(f'<option value="{k}"{" selected" if k == ps else ""}>{v}</option>' for k,v in SLOTS)}</select>{'' if self.as_admin else '<p class="muted" style="font-size:12px;margin:4px 0 0">Today&#39;s Morning slot closes at 12:00 PM.</p>'}</div>
+<div><label>Date</label><input type="date" name="date" required max="{t + timedelta(days=365)}" value="{dval}"></div>
+<div><label>Slot</label><select name="slot">{''.join(f'<option value="{k}"{" selected" if k == ps else ""}>{v}</option>' for k,v in SLOTS)}</select></div>
 <div><label>Trip</label><select name="trip">{''.join(f'<option value="{k}">{v}</option>' for k,v in TRIPS)}</select></div>
 <div><label>Booking amount (Rs)</label><input name="amount" inputmode="numeric" pattern="[0-9]{{1,7}}" required placeholder="e.g. 25000"></div>
+<div><label>Fuel cost (Rs, optional)</label><input name="fuel" inputmode="numeric" pattern="[0-9]{{0,7}}" value="0"></div>
+<div><label>With driver</label><select name="driver"><option value="1" selected>Yes</option><option value="0">No</option></select></div>
 </div><p><button class="btn">Book this slot</button></p></form>
-<div class="panel"><h2>Your upcoming bookings</h2>{('<div class="tablewrap"><table><tr><th>Date</th><th>Car</th><th>Slot</th><th>Trip</th><th>Amount</th><th></th></tr>' + rows + '</table></div>') if mine else '<p class="muted">No upcoming bookings.</p>'}</div>
+<div class="panel"><h2>Your totals · {plabel}</h2>{period_bar(pk, q)}{stat_cards(tot)}
+<h2>Your bookings · {plabel}</h2>{('<div class="tablewrap"><table><tr><th>Date</th><th>Car</th><th>Slot</th><th>Trip</th><th>Amount</th><th>Fuel (Rs) / Driver</th><th></th></tr>' + rows + '</table></div>') if mine else '<p class="muted">No bookings in this period.</p>'}</div>
 <h2>Availability</h2>{calendar(start, a["id"], BASE)}'''
         right = f'<form method="post" action="{BASE}/logout"><button class="btn ghost sm">Log out</button></form>'
         if self.as_admin:
@@ -282,27 +333,34 @@ class H(BaseHTTPRequestHandler):
 <form class="panel" method="post" action="{BASE}/admin/login" style="max-width:420px"><label>Username</label><input name="username" required autocapitalize="none">
 <label>Password</label><input name="password" type="password" required><p><button class="btn">Log in</button></p></form>'''
             return self.send(page('Admin', body))
-        show = q.get('show', ['upcoming'])[0]
         with db() as c:
             agents = c.execute('SELECT a.*, (SELECT COUNT(*) FROM bookings b WHERE b.agent_id=a.id AND b.cancelled_at IS NULL) n FROM agents a WHERE active=1 ORDER BY name').fetchall()
-            sql = 'SELECT b.*, a.name agent FROM bookings b JOIN agents a ON a.id=b.agent_id WHERE b.cancelled_at IS NULL'
-            args = ()
-            if show != 'all': sql += ' AND b.date>=?'; args = (today().isoformat(),)
-            bks = c.execute(sql + ' ORDER BY b.date, b.slot, b.car', args).fetchall()
-        total = sum(b['amount'] for b in bks)
+            pk, lo, hi, plabel = period(q); ps_sql, ps_args = period_sql(lo, hi)
+            bks = c.execute('SELECT b.*, a.name agent FROM bookings b JOIN agents a ON a.id=b.agent_id WHERE b.cancelled_at IS NULL' + ps_sql + ' ORDER BY b.date, b.slot, b.car', ps_args).fetchall()
+            po = payouts(c)
+        total = sum(b['amount'] for b in bks); tot = totals(bks, po)
+        per = {}
+        for b in bks: per.setdefault(b['agent'], []).append(b)
+        prow = ''.join(f'<tr><td>{e(n)}</td><td>{x["n"]}</td><td>{rs(x["rev"])}</td><td>{rs(x["com"])}</td><td>{rs(x["drv"])}</td><td>{rs(x["fuel"])}</td><td>{rs(x["net"])}</td></tr>'
+                       for n, x in sorted((n, totals(v, po)) for n, v in per.items()))
+        porow = ''.join(f'<tr><td>{e(n)}</td><td><input name="c_{k}" inputmode="numeric" pattern="[0-9]{{1,7}}" value="{po.get(k,(0,0))[0]}" style="width:100px"></td><td><input name="d_{k}" inputmode="numeric" pattern="[0-9]{{1,7}}" value="{po.get(k,(0,0))[1]}" style="width:100px"></td></tr>' for k, n in CARS)
         arows = ''.join(f'''<tr><td>{e(x["name"])}</td><td>{e(x["username"])}</td><td>{x["n"]}</td><td><form method="post" action="{BASE}/admin/agent-del" onsubmit="return confirm('Remove agent {e(x["name"])} and all their bookings?')">
 <input type="hidden" name="id" value="{x["id"]}"><button class="btn danger sm">Remove</button></form>
 <form method="post" action="{BASE}/admin/login-as" style="margin-top:6px"><input type="hidden" name="id" value="{x["id"]}"><button class="btn sm">Login as agent</button></form></td></tr>''' for x in agents)
         brows = ''.join(f'''<tr><td>{b["date"]}</td><td>{e(CARN.get(b["car"],b["car"]))}</td><td>{dict(SLOTS)[b["slot"]]}</td><td>{dict(TRIPS)[b["trip"]]}</td>
-<td>{e(b["agent"])}{' <span class="muted">(by admin)</span>' if b["by_admin"] else ''}</td><td>{rs(b["amount"])}</td><td><form method="post" action="{BASE}/admin/booking-cancel" onsubmit="return confirm('Cancel booking?')"><input type="hidden" name="id" value="{b["id"]}"><button class="btn danger sm">Cancel</button></form></td></tr>''' for b in bks)
+<td>{e(b["agent"])}{' <span class="muted">(by admin)</span>' if b["by_admin"] else ''}</td><td>{rs(b["amount"])}</td><td>{edit_cell(b, BASE + "/admin/booking-edit")}</td><td><form method="post" action="{BASE}/admin/booking-cancel" onsubmit="return confirm('Cancel booking?')"><input type="hidden" name="id" value="{b["id"]}"><button class="btn danger sm">Cancel</button></form></td></tr>''' for b in bks)
         body = f'''<span class="eyebrow">Admin</span><h1>Agent <span class="accent">admin</span></h1>{flash}
 <form class="panel" method="post" action="{BASE}/admin/agent-add"><h2>Add agent</h2><div class="grid2">
 <div><label>Name</label><input name="name" required maxlength="60"></div><div><label>Username</label><input name="username" required maxlength="40" pattern="[A-Za-z0-9._-]{{3,40}}" autocapitalize="none"></div>
 <div><label>Password (3 letters, blank = generate)</label><input name="password" maxlength="3" pattern="[A-Za-z]{{3}}"></div></div>
 <p class="muted">A unique 6-digit login code is generated automatically and shown once.</p><p><button class="btn">Add agent</button></p></form>
 <div class="panel"><h2>Agents</h2>{('<div class="tablewrap"><table><tr><th>Name</th><th>Username</th><th>Bookings</th><th></th></tr>'+arows+'</table></div>') if agents else '<p class="muted">No agents yet.</p>'}</div>
-<div class="panel"><h2>Bookings</h2><div class="tabs"><a class="btn sm {'' if show!='all' else 'ghost'}" href="?show=upcoming">Upcoming</a><a class="btn sm {'' if show=='all' else 'ghost'}" href="?show=all">All</a></div>
-{('<div class="tablewrap"><table><tr><th>Date</th><th>Car</th><th>Slot</th><th>Trip</th><th>Agent</th><th>Amount</th><th></th></tr>'+brows+f'</table></div><p><b>Total: {rs(total)}</b> · {len(bks)} bookings</p>') if bks else '<p class="muted">No bookings.</p>'}</div>
+<div class="panel"><h2>Totals · {plabel}</h2>{period_bar(pk, q)}{stat_cards(tot, True)}
+<p class="muted">Net = revenue − commission − driving − fuel. Driving counts only bookings with a driver. Cancelled bookings are excluded.</p>
+{('<h2>Per agent</h2><div class="tablewrap"><table><tr><th>Agent</th><th>Bookings</th><th>Revenue</th><th>Commission</th><th>Driving</th><th>Fuel</th><th>Net</th></tr>' + prow + '</table></div>') if per else ''}</div>
+<div class="panel"><h2>Bookings · {plabel}</h2>
+{('<div class="tablewrap"><table><tr><th>Date</th><th>Car</th><th>Slot</th><th>Trip</th><th>Agent</th><th>Amount</th><th>Fuel (Rs) / Driver</th><th></th></tr>'+brows+f'</table></div><p><b>Total: {rs(total)}</b> · {len(bks)} bookings</p>') if bks else '<p class="muted">No bookings.</p>'}</div>
+<form class="panel" method="post" action="{BASE}/admin/payouts"><h2>Per-car payouts (Rs per booking)</h2><div class="tablewrap"><table><tr><th>Car</th><th>Commission</th><th>Driving</th></tr>{porow}</table></div><p><button class="btn sm">Save payouts</button></p></form>
 <p class="muted">Public availability page (share with agents, not linked on the site): <a href="{BASE}/{SECRET["public_slug"]}">departrides.com{BASE}/{SECRET["public_slug"]}</a></p>'''
         right = f'<form method="post" action="{BASE}/admin/logout"><button class="btn ghost sm">Log out</button></form>'
         self.send(page('Admin', body, right))
@@ -319,7 +377,8 @@ class H(BaseHTTPRequestHandler):
                   BASE + '/admin/logout': lambda f, ip: self.redirect(BASE + '/admin', [self.end_session()]),
                   BASE + '/admin/agent-add': self.agent_add, BASE + '/admin/agent-del': self.agent_del,
                   BASE + '/admin/booking-cancel': self.admin_cancel, BASE + '/admin/login-as': self.login_as,
-                  BASE + '/admin/stop-as': self.stop_as}
+                  BASE + '/admin/stop-as': self.stop_as, BASE + '/edit': self.edit, BASE + '/admin/booking-edit': self.admin_edit,
+                  BASE + '/admin/payouts': self.set_payouts}
         if p not in routes: return self.send('Not found', 404)
         routes[p](f, ip)
 
@@ -350,21 +409,47 @@ class H(BaseHTTPRequestHandler):
         try: d = datetime.strptime(f.get('date', ''), '%Y-%m-%d').date()
         except ValueError: return err('Pick a valid date.')
         if car not in CARN or slot not in dict(SLOTS) or trip not in dict(TRIPS): return err('Invalid choice.')
-        if d > today() + timedelta(days=365): return err('Date must be within one year ahead.')
-        if self.as_admin:
-            if d < today() - timedelta(days=730): return err('Date is too far in the past.')
-        elif d < today():
-            return err(f'{fmt_day(d)} has already passed. Please pick today or a future date.')
-        elif slot_past(d, slot):
-            return err("Today's Morning slot closed at 12:00 PM. Please book the Evening slot or another day.")
+        if not (today() - timedelta(days=3650) <= d <= today() + timedelta(days=365)): return err('Pick a date within the last 10 years or up to one year ahead.')
+        fuel = f.get('fuel', '').replace(',', '').strip() or '0'; drv = 0 if f.get('driver') == '0' else 1
+        if not fuel.isdigit() or int(fuel) > 5_000_000: return err('Enter the fuel cost in rupees (numbers only), or leave it as 0.')
         if not amt.isdigit() or not (0 < int(amt) <= 5_000_000): return err('Enter the booking amount in rupees (numbers only).')
         try:
             with db() as c:
-                c.execute('INSERT INTO bookings(agent_id,car,date,slot,trip,amount,created_at,by_admin) VALUES(?,?,?,?,?,?,?,?)',
-                          (a['id'], car, d.isoformat(), slot, trip, int(amt), now_pkt().isoformat(timespec='seconds'), self.as_admin))
+                c.execute('INSERT INTO bookings(agent_id,car,date,slot,trip,amount,created_at,by_admin,fuel,driver) VALUES(?,?,?,?,?,?,?,?,?,?)',
+                          (a['id'], car, d.isoformat(), slot, trip, int(amt), now_pkt().isoformat(timespec='seconds'), self.as_admin, int(fuel), drv))
         except sqlite3.IntegrityError:
             return err(f'{CARN[car]} is already booked on {fmt_day(d)} ({dict(SLOTS)[slot]}). Pick another car, date or slot.')
         self.redirect(BASE + '/?' + urlencode({'m': f'Booked: {CARN[car]}, {fmt_day(d)}, {dict(SLOTS)[slot]}, {dict(TRIPS)[trip]}, {rs(int(amt))}.', 'from': d.isoformat() if d >= today() + timedelta(days=DAYS) else ''}))
+
+    def _edit(self, f, back, agent_id=None):
+        fuel = f.get('fuel', '').replace(',', '').strip() or '0'; drv = 0 if f.get('driver') == '0' else 1
+        if not fuel.isdigit() or int(fuel) > 5_000_000: return self.redirect(back + '?' + urlencode({'err': 'Fuel cost must be a number in rupees.'}))
+        with db() as c:
+            sql, args = 'UPDATE bookings SET fuel=?, driver=? WHERE id=? AND cancelled_at IS NULL', [int(fuel), drv, f.get('id')]
+            if agent_id is not None: sql += ' AND agent_id=?'; args.append(agent_id)
+            n = c.execute(sql, args).rowcount
+        self.redirect(back + '?' + urlencode({'m': 'Booking updated.'} if n else {'err': 'Booking not found.'}))
+
+    def edit(self, f, ip):
+        a = self.session('agent')
+        if not a: return self.redirect(BASE + '/')
+        self._edit(f, BASE + '/', a['id'])
+
+    def admin_edit(self, f, ip):
+        if not self.session('admin'): return self.redirect(BASE + '/admin')
+        self._edit(f, BASE + '/admin')
+
+    def set_payouts(self, f, ip):
+        if not self.session('admin'): return self.redirect(BASE + '/admin')
+        vals = []
+        for k, n in CARS:
+            cm, dv = f.get('c_' + k, '').replace(',', ''), f.get('d_' + k, '').replace(',', '')
+            if not (cm.isdigit() and dv.isdigit() and int(cm) <= 1_000_000 and int(dv) <= 1_000_000):
+                return self.redirect(BASE + '/admin?' + urlencode({'err': f'Payouts for {n} must be numbers in rupees.'}))
+            vals.append((k, int(cm), int(dv)))
+        with db() as c:
+            c.executemany('INSERT INTO payouts(car,commission,driving) VALUES(?,?,?) ON CONFLICT(car) DO UPDATE SET commission=excluded.commission, driving=excluded.driving', vals)
+        self.redirect(BASE + '/admin?' + urlencode({'m': 'Payouts saved.'}))
 
     def cancel(self, f, ip):
         a = self.session('agent')
