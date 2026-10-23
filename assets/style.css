@@ -910,3 +910,9 @@ html.cinema-mobile .scene-perf {
 }
 html.cinema-static .scene-hero { background: linear-gradient(90deg, #050706f2 8%, #05070688 55%, #05070633), url('v8-video-poster.webp') 60% 62%/cover; }
 html.cinema-static .scene-cabin { background: linear-gradient(90deg, #050706f0 0%, #05070688 50%, #05070655), url('seq/d/100.webp') center/cover; }
+
+/* poster shows instantly while frames load */
+.cinema-film { background: #050706 url('v8-video-poster.webp') 62% 50%/cover no-repeat; }
+.cinema-pin { contain: paint; }
+html.cinema-mobile .scene-perf { z-index: 7; background-color: #050706; isolation: isolate; }
+html.cinema-mobile #cinema { position: relative; z-index: 1; overflow: hidden; }

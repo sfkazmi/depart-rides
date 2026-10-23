@@ -1,4 +1,14 @@
 (function () {
+  try { initCinema(); } catch (err) {
+    // Never leave the page half-animated: fall back to the static layout.
+    console.error('cinema fallback', err);
+    document.documentElement.classList.add('cinema-static');
+    document.documentElement.classList.remove('cinema-mobile');
+    animateCounters(true);
+  }
+})();
+
+function initCinema() {
   if (document.body.dataset.page !== 'home') return;
 
   const cinema = document.getElementById('cinema');
@@ -147,7 +157,7 @@
   }
 
   window.addEventListener('load', () => window.ScrollTrigger.refresh());
-})();
+}
 
 function animateCounters(instant) {
   const nodes = document.querySelectorAll('[data-count]');

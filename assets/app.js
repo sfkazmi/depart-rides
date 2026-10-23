@@ -184,10 +184,10 @@ function home() {
             <p>Our 2018 Land Cruiser V8, photographed on our own fleet. Local Jhelum rates include fuel for the V8, Prado and Haval H6; outside-city rates are without fuel.</p>
           </div>
           <div class="counters">
-            <div class="counter"><strong><span data-count="5">00</span></strong><span>Cars in the fleet</span></div>
-            <div class="counter"><strong><em>Rs </em><span data-count="20">00</span><em>K</em></strong><span>V8 per day from · local, with fuel</span></div>
-            <div class="counter"><strong><em>Rs </em><span data-count="15">00</span><em>K</em></strong><span>Prado per day from · local, with fuel</span></div>
-            <div class="counter"><strong><span data-count="2018">0000</span></strong><span>Flagship V8 year</span></div>
+            <div class="counter"><strong><span data-count="5">05</span></strong><span>Cars in the fleet</span></div>
+            <div class="counter"><strong><em>Rs </em><span data-count="20">20</span><em>K</em></strong><span>V8 per day from · local, with fuel</span></div>
+            <div class="counter"><strong><em>Rs </em><span data-count="15">15</span><em>K</em></strong><span>Prado per day from · local, with fuel</span></div>
+            <div class="counter"><strong><span data-count="2018">2018</span></strong><span>Flagship V8 year</span></div>
           </div>
           <p class="price-note">Daily rates in PKR for local Jhelum and outside-city trips, plus Islamabad &amp; Islamabad Airport rates (with fuel) for the Prado and Land Cruiser V8. Availability is confirmed on inquiry; Jetour T2 and Corolla XLi are <strong>Price on demand</strong>.</p>
           <div class="price-grid">${priceCards()}</div>
