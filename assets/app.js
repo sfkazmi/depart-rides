@@ -19,7 +19,8 @@ const CARS = [
     rate: 'On request',
     rates: [
       { label: 'Local Jhelum', range: 'Rs 15,000 – 18,000', note: 'With fuel' },
-      { label: 'Outside city', range: 'Rs 14,000 – 17,000', note: 'Without fuel' }
+      { label: 'Outside city', range: 'Rs 14,000 – 17,000', note: 'Without fuel' },
+      { label: 'Islamabad & Islamabad Airport', range: 'Rs 27,000 – 30,000', note: 'With fuel' }
     ],
     image: 'assets/prado-three-quarter.jpg',
     gallery: ['assets/prado-three-quarter.jpg', 'assets/prado-front.jpg', 'assets/prado-angle.jpg'],
@@ -75,7 +76,8 @@ const CARS = [
     rate: 'On request',
     rates: [
       { label: 'Local Jhelum', range: 'Rs 20,000 – 25,000', note: 'With fuel' },
-      { label: 'Outside city', range: 'Rs 18,000 – 22,000', note: 'Without fuel' }
+      { label: 'Outside city', range: 'Rs 18,000 – 22,000', note: 'Without fuel' },
+      { label: 'Islamabad & Islamabad Airport', range: 'Rs 35,000 – 40,000', note: 'With fuel' }
     ],
     image: 'assets/land-cruiser-side.jpg',
     gallery: [
@@ -189,7 +191,7 @@ function home() {
             <div class="counter"><strong><em>Rs </em><span data-count="15">00</span><em>K</em></strong><span>Prado per day from · local, with fuel</span></div>
             <div class="counter"><strong><span data-count="2018">0000</span></strong><span>Flagship V8 year</span></div>
           </div>
-          <p class="price-note">Daily rates in PKR for local Jhelum and outside-city trips. Availability is confirmed on inquiry; Jetour T2 and Corolla XLi are <strong>Price on demand</strong>.</p>
+          <p class="price-note">Daily rates in PKR for local Jhelum and outside-city trips, plus Islamabad &amp; Islamabad Airport rates (with fuel) for the Prado and Land Cruiser V8. Availability is confirmed on inquiry; Jetour T2 and Corolla XLi are <strong>Price on demand</strong>.</p>
           <div class="price-grid">${priceCards()}</div>
         </div>
       </div>
@@ -237,7 +239,7 @@ function about() {
 function faq() {
   const data = [
     ['How do I book a car?', 'Browse the fleet, choose a vehicle and submit a booking inquiry with your dates and pickup location. A booking is only confirmed after direct communication with Depart Rides.'],
-    ['Are prices listed online?', 'Daily rate ranges in PKR are listed for the Toyota Prado, Haval H6 and Land Cruiser V8, for local Jhelum and outside-city trips. The Jetour T2 and Corolla XLi are Price on demand. Final rates depend on dates, trip duration and requirements and are confirmed on inquiry.'],
+    ['Are prices listed online?', 'Daily rate ranges in PKR are listed for the Toyota Prado, Haval H6 and Land Cruiser V8, for local Jhelum and outside-city trips. The Prado (Rs 27,000 – 30,000) and Land Cruiser V8 (Rs 35,000 – 40,000) also have daily rates with fuel for Islamabad and Islamabad Airport trips. The Jetour T2 and Corolla XLi are Price on demand. Final rates depend on dates, trip duration and requirements and are confirmed on inquiry.'],
     ['Can I request a driver?', 'Yes, you can mention your driver requirements in the booking inquiry. Availability and any additional charges must be confirmed directly.'],
     ['What documents do I need?', 'Required identification, license and security arrangements depend on the rental type and will be confirmed before booking.'],
     ['Can I change or cancel a booking?', 'Please contact Depart Rides directly. Cancellation and modification conditions will be explained when your booking is confirmed.'],
