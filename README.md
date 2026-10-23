@@ -46,8 +46,10 @@ Edit fleet details in `assets/app.js` under `CARS`, cinematic motion in `assets/
 - Toyota Prado: three actual photos in assets/prado-*.jpg, included in its vehicle gallery.
 - Home page motion reel: `assets/fleet-reel.mp4` (+ `fleet-reel-poster.jpg`), built with ffmpeg (Ken Burns zooms/pans, crossfades) from the business's own studio photos `land-cruiser-*`, `prado-*`, `v8-*` and `haval-h6-rear.jpg`. 1920x1080, ~20s, H.264, no audio. Replaces the former GWM video, which was removed because it showed bystanders.
 
-### Home scroll sequence (door → cabin → dashboard)
-`assets/v8-door-0.webp` (door closed), `v8-door-1.webp` (door open) and `v8-door-2.webp` (view through the open door) are AI-generated illustrative renders of the Land Cruiser V8 in the site's studio style. `assets/v8-dashboard.webp` is a real Wikimedia Commons photo of a first-facelift (2012) Land Cruiser J200 V8 dashboard (credited below and on the home page), cropped to a wide strip that pans with a perspective rotate on scroll.
+### Home scroll film (door → cabin → dashboard)
+The home hero is a scroll-scrubbed film drawn on a `<canvas>` from a WebP frame sequence (`assets/seq/d/` 1280px for desktop, `assets/seq/m/` 720px for phones, 100 frames each) for reliable scrubbing on iOS Safari. The footage is an AI-generated (Grok Imagine) illustrative clip of the V8's door opening and the camera moving in to the dashboard; poster `assets/v8-video-poster.webp` is used for reduced-motion. On phones the rates/perf block follows the film as a normal section.
+
+Earlier still frames: `assets/v8-door-0.webp` (door closed), `v8-door-1.webp` (door open) and `v8-door-2.webp` (view through the open door) are AI-generated illustrative renders of the Land Cruiser V8 in the site's studio style. `assets/v8-dashboard.webp` is a real Wikimedia Commons photo of a first-facelift (2012) Land Cruiser J200 V8 dashboard (credited below and on the home page), cropped to a wide strip that pans with a perspective rotate on scroll.
 
 ## Wikimedia Commons photo credits
 Shown on the site (fleet page note and each vehicle page). Images were resized/cropped.

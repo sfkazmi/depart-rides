@@ -142,10 +142,7 @@ function home() {
       <div class="cinema-letterbox cinema-letterbox--bot"></div>
       <div class="cinema-stage" id="cinema-stage">
         <div class="cinema-layer cinema-bg"></div>
-        <div class="cinema-layer cinema-side" data-layer="side"><img src="assets/v8-door-0.webp" alt="Toyota Land Cruiser V8 in the studio, illustrative render" fetchpriority="high"></div>
-        <div class="cinema-layer cinema-door" data-layer="door"><img src="assets/v8-door-1.webp" alt="Land Cruiser V8 with the front door opening, illustrative render"></div>
-        <div class="cinema-layer cinema-through" data-layer="through"><img src="assets/v8-door-2.webp" alt="Looking into the Land Cruiser V8 cabin through the open door, illustrative render" loading="lazy"></div>
-        <div class="cinema-layer cinema-dash" data-layer="dash"><img src="assets/v8-dashboard.webp" alt="Dashboard of a 2012–2013 facelift Toyota Land Cruiser V8 (J200), Wikimedia Commons photo" loading="lazy"><p class="cinema-credit">Dashboard: <a href="https://commons.wikimedia.org/wiki/File:2023_Manila_Auto_Salon_-_2012_Toyota_Land_Cruiser_J200_ZX_V8_by_Atoy_Customs_(interior).jpg" target="_blank" rel="noopener">2012 Land Cruiser J200 ZX V8 interior</a> by Ethan Llamas, CC BY 4.0 (cropped). Exterior door frames are illustrative renders.</p></div>
+        <div class="cinema-layer cinema-film" data-layer="film"><canvas id="cinema-canvas" aria-label="Scroll-driven film: the Land Cruiser V8 door opens and the camera moves inside to the dashboard (illustrative AI-generated footage)"></canvas><p class="cinema-credit">Illustrative AI-generated footage of the Land Cruiser V8.</p></div>
         <div class="cinema-layer cinema-front" data-layer="front"><img src="assets/v8-front.jpg" alt="Land Cruiser V8 front, actual Depart Rides vehicle"></div>
         <div class="cinema-layer cinema-engine" data-layer="engine"><img src="assets/stock-engine.jpg" alt="Illustrative engine bay photograph"></div>
         <div class="cinema-vignette"></div>

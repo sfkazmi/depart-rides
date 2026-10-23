@@ -8,58 +8,99 @@
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const hasGsap = typeof window.gsap !== 'undefined' && typeof window.ScrollTrigger !== 'undefined';
 
-  // Small screens get the static, fully scrollable layout (no pinned door sequence).
-  const small = matchMedia('(max-width: 900px)').matches;
-
-  if (reduce || !hasGsap || small) {
+  if (reduce || !hasGsap) {
     document.documentElement.classList.add('cinema-static');
     animateCounters(true);
     return;
   }
 
+  const small = matchMedia('(max-width: 900px)').matches;
   const gsap = window.gsap;
   gsap.registerPlugin(window.ScrollTrigger);
+  window.ScrollTrigger.config({ ignoreMobileResize: true });
 
   const q = (sel, root = pin) => root.querySelector(sel);
   const chapter = q('#cinema-chapter');
   const progressBar = q('#cinema-progress');
-  const side = q('[data-layer="side"]');
-  const door = q('[data-layer="door"]');
-  const through = q('[data-layer="through"]');
-  const dash = q('[data-layer="dash"]');
-  const dashImg = dash.querySelector('img');
+  const film = q('[data-layer="film"]');
+  const canvas = q('#cinema-canvas');
+  const ctx = canvas.getContext('2d');
   const front = q('[data-layer="front"]');
   const engine = q('[data-layer="engine"]');
   const hero = q('[data-scene="hero"]');
   const cabinScene = q('[data-scene="cabin"]');
   const perfScene = q('[data-scene="perf"]');
   const panels = gsap.utils.toArray('[data-panel]', pin);
-  const mm = gsap.matchMedia();
 
-  gsap.set([door, through, dash, front, engine, cabinScene, perfScene], { autoAlpha: 0 });
+  // ---- frame sequence (scrubbed like a video; reliable on iOS Safari) ----
+  const COUNT = 100;
+  const dir = small ? 'assets/seq/m/' : 'assets/seq/d/';
+  const frames = new Array(COUNT);
+  let current = -1;
+  const playhead = { f: 0 };
+
+  function sizeCanvas() {
+    const dpr = Math.min(window.devicePixelRatio || 1, small ? 2 : 1.5);
+    canvas.width = Math.round(canvas.clientWidth * dpr);
+    canvas.height = Math.round(canvas.clientHeight * dpr);
+    current = -1;
+    draw();
+  }
+  function nearestLoaded(i) {
+    for (let d = 0; d < COUNT; d++) {
+      if (frames[i - d] && frames[i - d].complete && frames[i - d].naturalWidth) return frames[i - d];
+      if (frames[i + d] && frames[i + d].complete && frames[i + d].naturalWidth) return frames[i + d];
+    }
+    return null;
+  }
+  function draw() {
+    const i = Math.max(0, Math.min(COUNT - 1, Math.round(playhead.f)));
+    const img = nearestLoaded(i);
+    if (!img || (i === current && img === frames[i])) return;
+    current = img === frames[i] ? i : -1;
+    const cw = canvas.width, ch = canvas.height;
+    const s = Math.max(cw / img.naturalWidth, ch / img.naturalHeight);
+    const w = img.naturalWidth * s, h = img.naturalHeight * s;
+    // keep the car/door (right of centre) in view on portrait screens
+    const fx = small ? 0.62 : 0.5;
+    ctx.drawImage(img, (cw - w) * fx, (ch - h) / 2, w, h);
+  }
+  function load(i) {
+    if (frames[i]) return;
+    const im = new Image();
+    im.decoding = 'async';
+    im.onload = draw;
+    im.src = dir + String(i + 1).padStart(3, '0') + '.webp';
+    frames[i] = im;
+  }
+  load(0);
+  // load key frames first, then fill in
+  for (let step = 16; step >= 1; step = step >> 1) for (let i = 0; i < COUNT; i += step) load(i);
+  window.addEventListener('resize', sizeCanvas);
+  sizeCanvas();
+
+  // On phones the price/perf block is too tall for a pinned screen: show it as a normal section after the film.
+  if (small) {
+    document.documentElement.classList.add('cinema-mobile');
+    cinema.after(perfScene);
+    gsap.set([front, engine], { display: 'none' });
+  }
+
+  gsap.set([cabinScene, front, engine].concat(small ? [] : [perfScene]), { autoAlpha: 0 });
   gsap.set(panels, { autoAlpha: 0, y: 28 });
-  gsap.set(side, { xPercent: 42, autoAlpha: 0 });
-  gsap.set(dashImg, { xPercent: 10, rotateY: 14, scale: 1.06, transformPerspective: 1400 });
+  gsap.set(film, { autoAlpha: 0 });
 
-  const intro = gsap.timeline({ defaults: { ease: 'power3.out' } });
-  intro
-    .to(side, { xPercent: 0, autoAlpha: 1, duration: 1.85, delay: 0.12 }, 0)
+  gsap.timeline({ defaults: { ease: 'power3.out' } })
+    .to(film, { autoAlpha: 1, duration: 1.2 }, 0)
     .from(hero.querySelectorAll('.line span, .eyebrow, .intro, .hero-actions, .scroll-hint'), {
-      y: 36,
-      autoAlpha: 0,
-      duration: 1.05,
-      stagger: 0.08,
-      ease: 'power3.out'
-    }, 0.32);
+      y: 36, autoAlpha: 0, duration: 1.05, stagger: 0.08
+    }, 0.3);
 
-  const chapters = [
-    { at: 0, text: '01  ·  ARRIVAL' },
-    { at: 0.3, text: '02  ·  THE CABIN' },
-    { at: 0.6, text: '03  ·  THE MACHINE' }
-  ];
+  const chapters = small
+    ? [{ at: 0, text: '01  ·  ARRIVAL' }, { at: 0.45, text: '02  ·  THE CABIN' }]
+    : [{ at: 0, text: '01  ·  ARRIVAL' }, { at: 0.3, text: '02  ·  THE CABIN' }, { at: 0.62, text: '03  ·  THE MACHINE' }];
 
   let countersFired = false;
-
   function setChapter(progress) {
     let text = chapters[0].text;
     for (const c of chapters) if (progress >= c.at) text = c.text;
@@ -67,51 +108,43 @@
     if (progressBar) progressBar.style.transform = `scaleX(${progress})`;
   }
 
-  function buildTimeline(scaleMax, origin) {
-    const tl = gsap.timeline({
-      defaults: { ease: 'none' },
-      scrollTrigger: {
-        trigger: pin,
-        start: 'top top',
-        end: '+=420%',
-        pin: true,
-        scrub: 0.65,
-        anticipatePin: 1,
-        invalidateOnRefresh: true,
-        onUpdate(self) {
-          setChapter(self.progress);
-          if (self.progress > 0.7 && !countersFired) {
-            countersFired = true;
-            animateCounters(false);
-          }
-        }
+  const filmEnd = small ? 0.78 : 0.56; // fraction of the pinned scroll that plays the film
+  const tl = gsap.timeline({
+    defaults: { ease: 'none' },
+    scrollTrigger: {
+      trigger: pin,
+      start: 'top top',
+      end: small ? '+=300%' : '+=420%',
+      pin: true,
+      scrub: small ? true : 0.5,
+      anticipatePin: 1,
+      invalidateOnRefresh: true,
+      onUpdate(self) {
+        setChapter(self.progress);
+        if (!small && self.progress > 0.7 && !countersFired) { countersFired = true; animateCounters(false); }
       }
-    });
+    }
+  });
 
-    // 1. door opens  2. camera moves in through the door  3. pan across the dashboard
-    tl.to(hero, { autoAlpha: 0, y: -24, duration: 0.1 }, 0.1)
-      .to(door, { autoAlpha: 1, duration: 0.12 }, 0.08)
-      .to([side, door], { scale: scaleMax, transformOrigin: origin, duration: 0.18 }, 0.16)
-      .fromTo(through, { autoAlpha: 0, scale: 1.25 }, { autoAlpha: 1, scale: 1.04, duration: 0.12 }, 0.26)
-      .to([side, door], { autoAlpha: 0, duration: 0.06 }, 0.32)
-      .to(through, { scale: 1.45, xPercent: -6, duration: 0.1 }, 0.36)
-      .to(dash, { autoAlpha: 1, duration: 0.08 }, 0.4)
-      .to(through, { autoAlpha: 0, duration: 0.06 }, 0.44)
-      .to(dashImg, { xPercent: -10, rotateY: -10, scale: 1, duration: 0.2 }, 0.4)
-      .to(cabinScene, { autoAlpha: 1, duration: 0.06 }, 0.5)
-      .to(panels, { autoAlpha: 1, y: 0, stagger: 0.02, duration: 0.06 }, 0.51)
-      .to(cabinScene, { autoAlpha: 0, duration: 0.06 }, 0.6)
-      .to(dash, { autoAlpha: 0, duration: 0.1 }, 0.62)
+  tl.to(playhead, { f: COUNT - 1, duration: filmEnd, onUpdate: draw }, 0)
+    .to(hero, { autoAlpha: 0, y: -24, duration: 0.08 }, 0.1);
+
+  if (small) {
+    tl.to(cabinScene, { autoAlpha: 1, duration: 0.08 }, 0.6)
+      .to(panels, { autoAlpha: 1, y: 0, stagger: 0.03, duration: 0.08 }, 0.64)
+      .to({}, { duration: 0.1 }, 0.9);
+    window.ScrollTrigger.create({ trigger: perfScene, start: 'top 75%', once: true, onEnter: () => animateCounters(false) });
+  } else {
+    tl.to(cabinScene, { autoAlpha: 1, duration: 0.06 }, 0.4)
+      .to(panels, { autoAlpha: 1, y: 0, stagger: 0.02, duration: 0.06 }, 0.42)
+      .to(cabinScene, { autoAlpha: 0, duration: 0.06 }, 0.58)
+      .to(film, { autoAlpha: 0, duration: 0.1 }, 0.6)
       .to(front, { autoAlpha: 1, scale: 1.08, duration: 0.14 }, 0.62)
       .to(front, { scale: 1.22, duration: 0.1 }, 0.74)
       .to(engine, { autoAlpha: 0.72, duration: 0.1 }, 0.78)
       .to(perfScene, { autoAlpha: 1, duration: 0.08 }, 0.76)
       .to([front, engine], { scale: 1.06, duration: 0.1 }, 0.9);
-
-    return tl;
   }
-
-  mm.add('(min-width: 901px)', () => buildTimeline(2.55, '58% 42%'));
 
   window.addEventListener('load', () => window.ScrollTrigger.refresh());
 })();

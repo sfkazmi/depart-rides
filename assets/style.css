@@ -434,6 +434,7 @@ p { color: var(--muted); }
 .cinema-track { height: auto; }
 .cinema-pin {
   height: 100vh;
+  height: 100svh;
   width: 100%;
   overflow: hidden;
   position: relative;
@@ -896,3 +897,16 @@ html.cinema-static .lux-panels, html.cinema-static .price-grid { pointer-events:
 .brand-logo img { display: block; height: 40px; width: auto; max-width: 62vw; }
 .footer .brand-logo img { height: 48px; }
 .detail-layout > * { min-width: 0; }
+
+/* scroll-scrubbed film */
+.cinema-film { display: block; }
+.cinema-film canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; filter: brightness(.8) contrast(1.06); }
+.cinema-film::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, #050706d9 0%, #05070666 45%, #05070600 75%); pointer-events: none; }
+html.cinema-mobile .cinema-film::after { background: linear-gradient(0deg, #050706e6 0%, #05070680 40%, #05070600 70%); }
+html.cinema-mobile .scene-perf {
+  position: relative; inset: auto; min-height: 0; opacity: 1 !important; visibility: visible !important;
+  transform: none !important; padding: 80px 0 60px; pointer-events: auto;
+  background: linear-gradient(0deg, #050706f2 30%, #05070699), url('v8-front.jpg') center 30%/cover;
+}
+html.cinema-static .scene-hero { background: linear-gradient(90deg, #050706f2 8%, #05070688 55%, #05070633), url('v8-video-poster.webp') 60% 62%/cover; }
+html.cinema-static .scene-cabin { background: linear-gradient(90deg, #050706f0 0%, #05070688 50%, #05070655), url('seq/d/100.webp') center/cover; }
