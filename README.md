@@ -59,3 +59,9 @@ Shown on the site (fleet page note and each vehicle page). Images were resized/c
 | `assets/haval-h6-front.jpg` | [File:Haval_H6_III_007.jpg](https://commons.wikimedia.org/wiki/File:Haval_H6_III_007.jpg) | Jengtingchen | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
 | `assets/v8-dashboard.webp` | [File:2023 Manila Auto Salon - 2012 Toyota Land Cruiser J200 ZX V8 by Atoy Customs (interior).jpg](https://commons.wikimedia.org/wiki/File:2023_Manila_Auto_Salon_-_2012_Toyota_Land_Cruiser_J200_ZX_V8_by_Atoy_Customs_(interior).jpg) | Ethan Llamas | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
 | `assets/corolla-xli-front.jpg` | [File:Toyota_Altis_2.0_V_(Attitude_Black).jpg](https://commons.wikimedia.org/wiki/File:Toyota_Altis_2.0_V_(Attitude_Black).jpg) | Captainmorlypogi1959 | CC BY-SA 4.0 |
+
+## Analytics
+
+GA4 is wired in `assets/analytics.js`. Set `GA_ID` to your Measurement ID (G-XXXXXXXXXX) to activate it; while it is empty nothing loads. Events: `whatsapp_click` (car_name), `call_click`, `vehicle_view` (car_id, car_name).
+
+Short links (Apache vhost, 302): /go/status, /go/wa-fb, /go/wa-group. Opens are counted by `/root/departrides-stats.sh` on the server.
