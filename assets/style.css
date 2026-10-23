@@ -872,3 +872,7 @@ html.cinema-static .lux-panels, html.cinema-static .price-grid { pointer-events:
 .wa-float svg{width:28px;height:28px}
 @media (max-width:760px){.wa-float{display:flex}.banner-actions{width:100%}.banner-actions .btn{flex:1 1 100%;justify-content:center}}
 .contact-actions .btn,.banner-actions .btn{white-space:nowrap}
+
+.brand-logo { display: inline-flex; align-items: center; }
+.brand-logo img { display: block; height: 40px; width: auto; max-width: 62vw; }
+.footer .brand-logo img { height: 48px; }
