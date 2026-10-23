@@ -16,7 +16,7 @@ No numeric rental rates exist in the original site data. Every vehicle is labell
 Performance counters on the home sequence use facts already on the site: 5 fleet vehicles, Prado 7 seats, 24/7 inquiry, 2018 flagship V8 year.
 
 ## Images
-The Land Cruiser V8 and Prado photographs in `assets/` are real images provided by the business. Haval H6, Jetour T2 and Corolla XLi images are freely licensed illustrative photos of each model from Wikimedia Commons (see credits below), stored locally in `assets/`. Replace them with photos of the actual cars when available.
+The Land Cruiser V8 and Prado photographs in `assets/` are real images provided by the business. Haval H6 and Corolla XLi images are freely licensed illustrative photos of each model from Wikimedia Commons (see credits below; Jetour T2 images are illustrative studio renders), stored locally in `assets/`. Replace them with photos of the actual cars when available.
 
 ### Stock interior and engine stills
 Cabin and engine photography of the actual fleet does not exist in `assets/`. The home sequence uses downloaded, free-license stills (illustrative only — not Depart Rides vehicles):
@@ -46,13 +46,14 @@ Edit fleet details in `assets/app.js` under `CARS`, cinematic motion in `assets/
 - Toyota Prado: three actual photos in assets/prado-*.jpg, included in its vehicle gallery.
 - Home page motion reel: `assets/fleet-reel.mp4` (+ `fleet-reel-poster.jpg`), built with ffmpeg (Ken Burns zooms/pans, crossfades) from the business's own studio photos `land-cruiser-*`, `prado-*`, `v8-*` and `haval-h6-rear.jpg`. 1920x1080, ~20s, H.264, no audio. Replaces the former GWM video, which was removed because it showed bystanders.
 
+### Home scroll sequence (door → cabin → dashboard)
+`assets/v8-door-0.webp` (door closed), `v8-door-1.webp` (door open) and `v8-door-2.webp` (view through the open door) are AI-generated illustrative renders of the Land Cruiser V8 in the site's studio style. `assets/v8-dashboard.webp` is a real Wikimedia Commons photo of a first-facelift (2012) Land Cruiser J200 V8 dashboard (credited below and on the home page), cropped to a wide strip that pans with a perspective rotate on scroll.
+
 ## Wikimedia Commons photo credits
-Shown on the site (fleet page note and each vehicle page). Images were resized/cropped; the Jetour front photo has background bystanders blurred.
+Shown on the site (fleet page note and each vehicle page). Images were resized/cropped.
 
 | File | Source | Author | License |
 |---|---|---|---|
 | `assets/haval-h6-front.jpg` | [File:Haval_H6_III_007.jpg](https://commons.wikimedia.org/wiki/File:Haval_H6_III_007.jpg) | Jengtingchen | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
-| `assets/jetour-t2-front.jpg` | [File:Jetour_Traveller_001.jpg](https://commons.wikimedia.org/wiki/File:Jetour_Traveller_001.jpg) | JustAnotherCarDesigner | CC BY-SA 4.0 |
-| `assets/jetour-t2-rear.jpg` | [File:Jetour_Traveller_006.jpg](https://commons.wikimedia.org/wiki/File:Jetour_Traveller_006.jpg) | JustAnotherCarDesigner | CC0 |
-| `assets/jetour-t2-side.jpg` | [File:Jetour_Traveller_012.jpg](https://commons.wikimedia.org/wiki/File:Jetour_Traveller_012.jpg) | JustAnotherCarDesigner | CC0 |
+| `assets/v8-dashboard.webp` | [File:2023 Manila Auto Salon - 2012 Toyota Land Cruiser J200 ZX V8 by Atoy Customs (interior).jpg](https://commons.wikimedia.org/wiki/File:2023_Manila_Auto_Salon_-_2012_Toyota_Land_Cruiser_J200_ZX_V8_by_Atoy_Customs_(interior).jpg) | Ethan Llamas | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
 | `assets/corolla-xli-front.jpg` | [File:Toyota_Altis_2.0_V_(Attitude_Black).jpg](https://commons.wikimedia.org/wiki/File:Toyota_Altis_2.0_V_(Attitude_Black).jpg) | Captainmorlypogi1959 | CC BY-SA 4.0 |

@@ -487,6 +487,24 @@ p { color: var(--muted); }
   -webkit-mask-image: none;
   mask-image: none;
 }
+.cinema-through img {
+  width: 100%; height: 100%; object-fit: cover; object-position: 45% 55%;
+  filter: brightness(.9) contrast(1.06) saturate(.9);
+  -webkit-mask-image: none; mask-image: none;
+}
+.cinema-dash { overflow: hidden; perspective: 1400px; }
+.cinema-dash img {
+  width: 125%; max-width: none; height: 100%; object-fit: cover; object-position: 50% 45%;
+  filter: brightness(.86) contrast(1.08) saturate(.85);
+  -webkit-mask-image: none; mask-image: none;
+  backface-visibility: hidden;
+}
+.cinema-credit {
+  position: absolute; left: 50%; bottom: 52px; transform: translateX(-50%);
+  margin: 0; width: max-content; max-width: 92vw; text-align: center;
+  font-size: 10px; letter-spacing: .04em; color: rgba(255,255,255,.55); z-index: 3;
+}
+.cinema-credit a { color: inherit; text-decoration: underline; }
 .cinema-front img {
   object-position: 50% 70%;
   filter: brightness(.82) contrast(1.16) saturate(.8);
