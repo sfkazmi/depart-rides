@@ -65,3 +65,7 @@ Shown on the site (fleet page note and each vehicle page). Images were resized/c
 GA4 is wired in `assets/analytics.js`. Set `GA_ID` to your Measurement ID (G-XXXXXXXXXX) to activate it; while it is empty nothing loads. Events: `whatsapp_click` (car_name), `call_click`, `vehicle_view` (car_id, car_name).
 
 Short links (Apache vhost, 302): /go/status, /go/wa-fb, /go/wa-group. Opens are counted by `/root/departrides-stats.sh` on the server.
+
+## Agent portal
+
+`portal/app.py` (Python stdlib + SQLite) runs as the `departrides-portal` systemd service on 127.0.0.1:3891; Apache proxies `/agents/`. State, secrets and the DB live in /var/lib/departrides-portal (not in git); the `/portal/` folder is denied by the vhost. Admin login: /agents/admin.

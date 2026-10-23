@@ -1,0 +1,18 @@
+[Unit]
+Description=Depart Rides agent portal
+After=network.target
+
+[Service]
+User=departportal
+Group=departportal
+Environment=PORTAL_STATE=/var/lib/departrides-portal
+ExecStart=/usr/bin/python3 /var/www/departrides/portal/app.py
+Restart=on-failure
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ReadWritePaths=/var/lib/departrides-portal
+
+[Install]
+WantedBy=multi-user.target
