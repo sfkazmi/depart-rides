@@ -2,14 +2,25 @@ openapi: 3.0.3
 info:
   title: Depart Rides API
   version: "1.0.0"
-  description: JSON API for Depart Rides Flutter app (pk.departrides.app). Bearer token auth.
+  description: |
+    JSON API for the Depart Rides Flutter app (`pk.departrides.app`) and clients.
+    Bearer token auth. HTML portal cookie sessions are separate and unchanged.
+  contact:
+    name: Depart Rides
+    url: https://departrides.com/
 servers:
   - url: https://departrides.com/agents/api/v1
     description: Production
-security: []
+tags:
+  - name: Public
+  - name: Auth
+  - name: Customer
+  - name: Agent
+  - name: Admin
 paths:
   /health:
     get:
+      tags: [Public]
       summary: Health check
       operationId: health
       responses:
@@ -21,27 +32,56 @@ paths:
                 type: object
                 properties:
                   ok: { type: boolean }
+                  service: { type: string }
                   version: { type: string }
   /fleet:
     get:
-      summary: Fleet and rates
-      operationId: getFleet
+      tags: [Public]
+      summary: Fleet and indicative rates
+      operationId: fleet
       responses:
         "200":
-          description: Fleet list
+          description: Car list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cars:
+                    type: array
+                    items: { $ref: "#/components/schemas/Car" }
   /availability:
     get:
-      summary: Public availability calendar
-      operationId: getAvailability
+      tags: [Public, Agent]
+      summary: Slot availability (finalized occupancy only)
+      operationId: availability
       parameters:
         - name: start
           in: query
           schema: { type: string, format: date }
+          description: Start date YYYY-MM-DD (PKT); default today
       responses:
         "200":
-          description: Calendar
+          description: Calendar slots
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  start: { type: string, format: date }
+                  days: { type: integer }
+                  slots:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        date: { type: string, format: date }
+                        car: { type: string }
+                        slot: { type: string, enum: [morning, evening] }
+                        status: { type: string, enum: [available, booked, past] }
   /auth/signup:
     post:
+      tags: [Auth]
       summary: Customer signup
       operationId: signup
       requestBody:
@@ -53,17 +93,21 @@ paths:
               required: [name, phone, password]
               properties:
                 name: { type: string }
-                phone: { type: string }
+                phone: { type: string, example: "03001234567" }
                 password: { type: string, minLength: 8 }
-                email: { type: string, nullable: true }
+                email: { type: string, format: email }
       responses:
         "201":
           description: Created + token
           content:
             application/json:
               schema: { $ref: "#/components/schemas/AuthResponse" }
+        "400": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
   /auth/login:
     post:
+      tags: [Auth]
       summary: Login (password or agent code)
       operationId: login
       requestBody:
@@ -71,41 +115,90 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                username: { type: string }
-                password: { type: string }
-                code: { type: string, pattern: "^[0-9]{6}$" }
+              oneOf:
+                - type: object
+                  required: [password]
+                  properties:
+                    username: { type: string }
+                    phone: { type: string }
+                    password: { type: string }
+                - type: object
+                  required: [code]
+                  properties:
+                    code: { type: string, pattern: "^[0-9]{6}$" }
       responses:
         "200":
-          description: Token
+          description: Token + role + user + expiresAt
           content:
             application/json:
               schema: { $ref: "#/components/schemas/AuthResponse" }
+        "401": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
   /auth/logout:
     post:
-      summary: Revoke token
+      tags: [Auth]
+      summary: Revoke Bearer token
       operationId: logout
       security: [{ bearerAuth: [] }]
       responses:
-        "200": { description: Logged out }
+        "200":
+          description: Revoked
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+        "401": { $ref: "#/components/responses/Error" }
   /me:
     get:
-      summary: Current user
+      tags: [Auth]
+      summary: Current principal
       operationId: me
       security: [{ bearerAuth: [] }]
       responses:
-        "200": { description: Profile }
+        "200":
+          description: Role and user
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      role: { type: string, enum: [customer, agent, admin] }
+                      user: { type: object }
+                      expiresAt: { type: string, format: date-time }
+                      impersonatedByAdmin: { type: boolean }
+                      adminId: { type: integer }
+        "401": { $ref: "#/components/responses/Error" }
   /requests:
     post:
+      tags: [Customer]
       summary: Customer booking request
       operationId: createRequest
       security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/BookingRequest" }
       responses:
-        "201": { description: Created }
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  booking: { $ref: "#/components/schemas/Booking" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
   /bookings:
     get:
-      summary: List my bookings (role-scoped)
+      tags: [Customer, Agent]
+      summary: List my bookings
       operationId: listBookings
       security: [{ bearerAuth: [] }]
       parameters:
@@ -113,34 +206,89 @@ paths:
         - $ref: "#/components/parameters/from"
         - $ref: "#/components/parameters/to"
       responses:
-        "200": { description: Bookings }
+        "200":
+          description: Bookings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bookings:
+                    type: array
+                    items: { $ref: "#/components/schemas/Booking" }
+        "401": { $ref: "#/components/responses/Error" }
     post:
-      summary: Agent create finalized booking
-      operationId: createBooking
+      tags: [Agent]
+      summary: Agent finalize booking
+      operationId: agentCreateBooking
       security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AgentBookingCreate" }
       responses:
-        "201": { description: Created }
+        "201":
+          description: Finalized booking
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  booking: { $ref: "#/components/schemas/Booking" }
+        "400": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
   /bookings/{id}:
     patch:
-      summary: Edit booking (fuel/driver/amount)
+      tags: [Agent, Admin]
+      summary: Edit fuel/driver
       operationId: patchBooking
       security: [{ bearerAuth: [] }]
       parameters:
         - $ref: "#/components/parameters/id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fuel: { type: integer, minimum: 0 }
+                driver: { type: boolean }
       responses:
-        "200": { description: Updated }
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  booking: { $ref: "#/components/schemas/Booking" }
+        "404": { $ref: "#/components/responses/Error" }
   /bookings/{id}/cancel:
     post:
-      summary: Cancel booking
+      tags: [Customer, Agent]
+      summary: Cancel own booking/request
       operationId: cancelBooking
       security: [{ bearerAuth: [] }]
       parameters:
         - $ref: "#/components/parameters/id"
       responses:
-        "200": { description: Cancelled }
+        "200":
+          description: Cancelled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  booking: { $ref: "#/components/schemas/Booking" }
+        "404": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
   /totals:
     get:
-      summary: Agent totals
+      tags: [Agent]
+      summary: Agent totals for period
       operationId: agentTotals
       security: [{ bearerAuth: [] }]
       parameters:
@@ -148,57 +296,140 @@ paths:
         - $ref: "#/components/parameters/from"
         - $ref: "#/components/parameters/to"
       responses:
-        "200": { description: Totals }
+        "200":
+          description: Totals
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TotalsResponse" }
   /admin/requests:
     get:
+      tags: [Admin]
       summary: Pending customer requests
       operationId: adminListRequests
       security: [{ bearerAuth: [] }]
       responses:
-        "200": { description: Pending }
+        "200":
+          description: Pending list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  requests:
+                    type: array
+                    items: { $ref: "#/components/schemas/AdminRequest" }
   /admin/requests/{id}/finalize:
     post:
-      summary: Finalize request
+      tags: [Admin]
+      summary: Finalize customer request
       operationId: adminFinalize
       security: [{ bearerAuth: [] }]
       parameters:
         - $ref: "#/components/parameters/id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amount]
+              properties:
+                amount: { type: integer, minimum: 1 }
       responses:
-        "200": { description: Finalized }
+        "200":
+          description: Finalized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  booking: { $ref: "#/components/schemas/Booking" }
+        "409": { $ref: "#/components/responses/Error" }
   /admin/requests/{id}/reject:
     post:
-      summary: Reject request
+      tags: [Admin]
+      summary: Reject customer request
       operationId: adminReject
       security: [{ bearerAuth: [] }]
       parameters:
         - $ref: "#/components/parameters/id"
       responses:
-        "200": { description: Rejected }
+        "200":
+          description: Rejected
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  booking: { $ref: "#/components/schemas/Booking" }
   /admin/agents:
     get:
+      tags: [Admin]
       summary: List agents
       operationId: adminListAgents
       security: [{ bearerAuth: [] }]
       responses:
-        "200": { description: Agents }
+        "200":
+          description: Agents
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  agents:
+                    type: array
+                    items: { $ref: "#/components/schemas/Agent" }
     post:
-      summary: Add agent
-      operationId: adminAddAgent
+      tags: [Admin]
+      summary: Create agent (returns password + code once)
+      operationId: adminCreateAgent
       security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, username]
+              properties:
+                name: { type: string }
+                username: { type: string }
+                password: { type: string, minLength: 3, maxLength: 3, description: "Optional 3 letters" }
       responses:
-        "201": { description: Created with one-time credentials }
+        "201":
+          description: Created (credentials once)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  agent: { $ref: "#/components/schemas/Agent" }
+                  password: { type: string }
+                  code: { type: string }
   /admin/agents/{id}:
     delete:
-      summary: Remove agent
+      tags: [Admin]
+      summary: Delete agent
       operationId: adminDeleteAgent
       security: [{ bearerAuth: [] }]
       parameters:
         - $ref: "#/components/parameters/id"
       responses:
-        "200": { description: Removed }
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
   /admin/agents/{id}/login-as:
     post:
-      summary: Impersonate agent (returns agent token)
+      tags: [Admin]
+      summary: Issue agent-scoped token (admin impersonation)
+      description: |
+        Returns a new Bearer token with role=agent for the target agent.
+        `/me` on that token reports impersonatedByAdmin=true.
       operationId: adminLoginAs
       security: [{ bearerAuth: [] }]
       parameters:
@@ -208,10 +439,16 @@ paths:
           description: Agent token
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/AuthResponse" }
+              schema:
+                allOf:
+                  - { $ref: "#/components/schemas/AuthResponse" }
+                  - type: object
+                    properties:
+                      impersonatedByAdmin: { type: boolean }
   /admin/bookings:
     get:
-      summary: All finalized bookings
+      tags: [Admin]
+      summary: All finalized bookings in period
       operationId: adminListBookings
       security: [{ bearerAuth: [] }]
       parameters:
@@ -219,23 +456,106 @@ paths:
         - $ref: "#/components/parameters/from"
         - $ref: "#/components/parameters/to"
       responses:
-        "200": { description: Bookings }
+        "200":
+          description: Bookings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bookings:
+                    type: array
+                    items: { $ref: "#/components/schemas/Booking" }
+  /admin/bookings/{id}:
+    patch:
+      tags: [Admin]
+      summary: Admin edit fuel/driver
+      operationId: adminPatchBooking
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/id"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fuel: { type: integer }
+                driver: { type: boolean }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  booking: { $ref: "#/components/schemas/Booking" }
+  /admin/bookings/{id}/cancel:
+    post:
+      tags: [Admin]
+      summary: Admin cancel booking
+      operationId: adminCancelBooking
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/id"
+      responses:
+        "200":
+          description: Cancelled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  booking: { $ref: "#/components/schemas/Booking" }
   /admin/payouts:
     get:
-      summary: Per-car payouts
-      operationId: getPayouts
+      tags: [Admin]
+      summary: Per-car commission and driving payouts
+      operationId: adminGetPayouts
       security: [{ bearerAuth: [] }]
       responses:
-        "200": { description: Payouts }
+        "200":
+          description: Payouts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  payouts:
+                    type: array
+                    items: { $ref: "#/components/schemas/Payout" }
     put:
+      tags: [Admin]
       summary: Update payouts
-      operationId: putPayouts
+      operationId: adminPutPayouts
       security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [payouts]
+              properties:
+                payouts:
+                  type: array
+                  items: { $ref: "#/components/schemas/Payout" }
       responses:
-        "200": { description: Saved }
+        "200":
+          description: Saved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  payouts:
+                    type: array
+                    items: { $ref: "#/components/schemas/Payout" }
   /admin/totals:
     get:
-      summary: Admin totals including net
+      tags: [Admin]
+      summary: Admin totals + per-agent breakdown
       operationId: adminTotals
       security: [{ bearerAuth: [] }]
       parameters:
@@ -243,7 +563,23 @@ paths:
         - $ref: "#/components/parameters/from"
         - $ref: "#/components/parameters/to"
       responses:
-        "200": { description: Totals + perAgent }
+        "200":
+          description: Totals
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: "#/components/schemas/TotalsResponse" }
+                  - type: object
+                    properties:
+                      byAgent:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            agentId: { type: integer }
+                            name: { type: string }
+                            totals: { $ref: "#/components/schemas/Totals" }
 components:
   securitySchemes:
     bearerAuth:
@@ -259,7 +595,11 @@ components:
     period:
       name: period
       in: query
-      schema: { type: string, enum: [this_month, last_month, all] }
+      schema:
+        type: string
+        enum: [this_month, last_month, all, month, last, custom]
+        default: this_month
+      description: Use from+to when custom / for date range
     from:
       name: from
       in: query
@@ -268,7 +608,18 @@ components:
       name: to
       in: query
       schema: { type: string, format: date }
+  responses:
+    Error:
+      description: Error
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
   schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error: { type: string }
     AuthResponse:
       type: object
       required: [token, role, expiresAt, user]
@@ -276,10 +627,105 @@ components:
         token: { type: string }
         role: { type: string, enum: [customer, agent, admin] }
         expiresAt: { type: string, format: date-time }
-        user: { type: object, additionalProperties: true }
+        user: { type: object }
         impersonatedByAdmin: { type: boolean }
-    Error:
+    Car:
       type: object
-      required: [error]
       properties:
-        error: { type: string }
+        id: { type: string }
+        name: { type: string }
+        type: { type: string }
+        year: { type: string }
+        seats: { type: string }
+        tag: { type: string }
+        rate: { type: string }
+        rates:
+          type: array
+          items:
+            type: object
+            properties:
+              label: { type: string }
+              range: { type: string }
+              note: { type: string }
+        image: { type: string, format: uri }
+    BookingRequest:
+      type: object
+      required: [car, date, slot, trip]
+      properties:
+        car: { type: string }
+        date: { type: string, format: date }
+        slot: { type: string, enum: [morning, evening] }
+        trip: { type: string, enum: [local, out] }
+        notes: { type: string, maxLength: 200 }
+    AgentBookingCreate:
+      type: object
+      required: [car, date, slot, trip, amount]
+      properties:
+        car: { type: string }
+        date: { type: string, format: date }
+        slot: { type: string, enum: [morning, evening] }
+        trip: { type: string, enum: [local, out] }
+        amount: { type: integer, minimum: 1 }
+        fuel: { type: integer, minimum: 0, default: 0 }
+        driver: { type: boolean, default: true }
+    Booking:
+      type: object
+      properties:
+        id: { type: integer }
+        car: { type: string }
+        carName: { type: string }
+        date: { type: string, format: date }
+        slot: { type: string }
+        trip: { type: string }
+        status: { type: string, enum: [requested, finalized, rejected, cancelled] }
+        notes: { type: string }
+        amount: { type: integer }
+        fuel: { type: integer }
+        driver: { type: boolean }
+        agentId: { type: integer, nullable: true }
+        customerId: { type: integer, nullable: true }
+        createdAt: { type: string, format: date-time }
+        cancelledAt: { type: string, format: date-time, nullable: true }
+    AdminRequest:
+      allOf:
+        - { $ref: "#/components/schemas/Booking" }
+        - type: object
+          properties:
+            customer:
+              type: object
+              properties:
+                id: { type: integer }
+                name: { type: string }
+                phone: { type: string }
+    Agent:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        username: { type: string }
+        bookings: { type: integer }
+        active: { type: boolean }
+    Payout:
+      type: object
+      properties:
+        car: { type: string }
+        carName: { type: string }
+        commission: { type: integer }
+        driving: { type: integer }
+    Totals:
+      type: object
+      properties:
+        bookings: { type: integer }
+        revenue: { type: integer }
+        commission: { type: integer }
+        driving: { type: integer }
+        fuel: { type: integer }
+        net: { type: integer }
+    TotalsResponse:
+      type: object
+      properties:
+        period: { type: string }
+        label: { type: string }
+        from: { type: string, format: date, nullable: true }
+        to: { type: string, format: date, nullable: true }
+        totals: { $ref: "#/components/schemas/Totals" }
