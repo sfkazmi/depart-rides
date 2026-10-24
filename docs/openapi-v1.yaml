@@ -1,0 +1,285 @@
+openapi: 3.0.3
+info:
+  title: Depart Rides API
+  version: "1.0.0"
+  description: JSON API for Depart Rides Flutter app (pk.departrides.app). Bearer token auth.
+servers:
+  - url: https://departrides.com/agents/api/v1
+    description: Production
+security: []
+paths:
+  /health:
+    get:
+      summary: Health check
+      operationId: health
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  version: { type: string }
+  /fleet:
+    get:
+      summary: Fleet and rates
+      operationId: getFleet
+      responses:
+        "200":
+          description: Fleet list
+  /availability:
+    get:
+      summary: Public availability calendar
+      operationId: getAvailability
+      parameters:
+        - name: start
+          in: query
+          schema: { type: string, format: date }
+      responses:
+        "200":
+          description: Calendar
+  /auth/signup:
+    post:
+      summary: Customer signup
+      operationId: signup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, phone, password]
+              properties:
+                name: { type: string }
+                phone: { type: string }
+                password: { type: string, minLength: 8 }
+                email: { type: string, nullable: true }
+      responses:
+        "201":
+          description: Created + token
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthResponse" }
+  /auth/login:
+    post:
+      summary: Login (password or agent code)
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username: { type: string }
+                password: { type: string }
+                code: { type: string, pattern: "^[0-9]{6}$" }
+      responses:
+        "200":
+          description: Token
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthResponse" }
+  /auth/logout:
+    post:
+      summary: Revoke token
+      operationId: logout
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Logged out }
+  /me:
+    get:
+      summary: Current user
+      operationId: me
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Profile }
+  /requests:
+    post:
+      summary: Customer booking request
+      operationId: createRequest
+      security: [{ bearerAuth: [] }]
+      responses:
+        "201": { description: Created }
+  /bookings:
+    get:
+      summary: List my bookings (role-scoped)
+      operationId: listBookings
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/period"
+        - $ref: "#/components/parameters/from"
+        - $ref: "#/components/parameters/to"
+      responses:
+        "200": { description: Bookings }
+    post:
+      summary: Agent create finalized booking
+      operationId: createBooking
+      security: [{ bearerAuth: [] }]
+      responses:
+        "201": { description: Created }
+  /bookings/{id}:
+    patch:
+      summary: Edit booking (fuel/driver/amount)
+      operationId: patchBooking
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/id"
+      responses:
+        "200": { description: Updated }
+  /bookings/{id}/cancel:
+    post:
+      summary: Cancel booking
+      operationId: cancelBooking
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/id"
+      responses:
+        "200": { description: Cancelled }
+  /totals:
+    get:
+      summary: Agent totals
+      operationId: agentTotals
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/period"
+        - $ref: "#/components/parameters/from"
+        - $ref: "#/components/parameters/to"
+      responses:
+        "200": { description: Totals }
+  /admin/requests:
+    get:
+      summary: Pending customer requests
+      operationId: adminListRequests
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Pending }
+  /admin/requests/{id}/finalize:
+    post:
+      summary: Finalize request
+      operationId: adminFinalize
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/id"
+      responses:
+        "200": { description: Finalized }
+  /admin/requests/{id}/reject:
+    post:
+      summary: Reject request
+      operationId: adminReject
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/id"
+      responses:
+        "200": { description: Rejected }
+  /admin/agents:
+    get:
+      summary: List agents
+      operationId: adminListAgents
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Agents }
+    post:
+      summary: Add agent
+      operationId: adminAddAgent
+      security: [{ bearerAuth: [] }]
+      responses:
+        "201": { description: Created with one-time credentials }
+  /admin/agents/{id}:
+    delete:
+      summary: Remove agent
+      operationId: adminDeleteAgent
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/id"
+      responses:
+        "200": { description: Removed }
+  /admin/agents/{id}/login-as:
+    post:
+      summary: Impersonate agent (returns agent token)
+      operationId: adminLoginAs
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/id"
+      responses:
+        "200":
+          description: Agent token
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthResponse" }
+  /admin/bookings:
+    get:
+      summary: All finalized bookings
+      operationId: adminListBookings
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/period"
+        - $ref: "#/components/parameters/from"
+        - $ref: "#/components/parameters/to"
+      responses:
+        "200": { description: Bookings }
+  /admin/payouts:
+    get:
+      summary: Per-car payouts
+      operationId: getPayouts
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Payouts }
+    put:
+      summary: Update payouts
+      operationId: putPayouts
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Saved }
+  /admin/totals:
+    get:
+      summary: Admin totals including net
+      operationId: adminTotals
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/period"
+        - $ref: "#/components/parameters/from"
+        - $ref: "#/components/parameters/to"
+      responses:
+        "200": { description: Totals + perAgent }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque
+  parameters:
+    id:
+      name: id
+      in: path
+      required: true
+      schema: { type: integer }
+    period:
+      name: period
+      in: query
+      schema: { type: string, enum: [this_month, last_month, all] }
+    from:
+      name: from
+      in: query
+      schema: { type: string, format: date }
+    to:
+      name: to
+      in: query
+      schema: { type: string, format: date }
+  schemas:
+    AuthResponse:
+      type: object
+      required: [token, role, expiresAt, user]
+      properties:
+        token: { type: string }
+        role: { type: string, enum: [customer, agent, admin] }
+        expiresAt: { type: string, format: date-time }
+        user: { type: object, additionalProperties: true }
+        impersonatedByAdmin: { type: boolean }
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error: { type: string }
