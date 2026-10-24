@@ -408,7 +408,7 @@ class H(BaseHTTPRequestHandler):
             pk, lo, hi, plabel = period(q); ps_sql, ps_args = period_sql(lo, hi)
             bks = c.execute('''SELECT b.*, COALESCE(a.name, cu.name) agent, CASE WHEN b.customer_id IS NOT NULL THEN 1 ELSE 0 END is_cust
                 FROM bookings b LEFT JOIN agents a ON a.id=b.agent_id LEFT JOIN customers cu ON cu.id=b.customer_id
-                WHERE b.cancelled_at IS NULL AND b.status='finalized''' + ps_sql + ' ORDER BY b.date, b.slot, b.car', ps_args).fetchall()
+                WHERE b.cancelled_at IS NULL AND b.status='finalized' ''' + ps_sql + ' ORDER BY b.date, b.slot, b.car', ps_args).fetchall()
             pending = c.execute('''SELECT b.*, cu.name cname, cu.phone cphone FROM bookings b JOIN customers cu ON cu.id=b.customer_id
                 WHERE b.status='requested' AND b.cancelled_at IS NULL ORDER BY b.date, b.slot, b.car''').fetchall()
             po = payouts(c)
