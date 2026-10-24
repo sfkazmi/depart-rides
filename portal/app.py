@@ -132,6 +132,10 @@ def init_db():
         c.execute('DROP INDEX IF EXISTS one_booking')
         c.execute("CREATE UNIQUE INDEX IF NOT EXISTS one_finalized ON bookings(car, date, slot) WHERE status='finalized' AND cancelled_at IS NULL")
         c.execute("CREATE UNIQUE INDEX IF NOT EXISTS one_pending ON bookings(car, date, slot) WHERE status='requested' AND cancelled_at IS NULL")
+        c.execute("""CREATE TABLE IF NOT EXISTS api_tokens(
+            token_hash TEXT PRIMARY KEY, role TEXT NOT NULL, ref_id INTEGER NOT NULL,
+            expires REAL NOT NULL, admin_id INTEGER, created_at TEXT NOT NULL)""")
+        c.execute('CREATE INDEX IF NOT EXISTS api_tokens_exp ON api_tokens(expires)')
 
 def pw_hash(pw, salt=None):
     salt = salt or secrets.token_bytes(16)
@@ -709,6 +713,9 @@ def set_admin(username, pw=None):
     with db() as c:
         c.execute('INSERT INTO admins(username,pw_hash) VALUES(?,?) ON CONFLICT(username) DO UPDATE SET pw_hash=excluded.pw_hash', (username, pw_hash(pw)))
     return pw
+
+import api as _api_mod
+_api_mod.attach(sys.modules[__name__])
 
 if __name__ == '__main__':
     os.makedirs(STATE, exist_ok=True); SECRET = load_secret(); init_db()
